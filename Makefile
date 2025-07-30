@@ -4,7 +4,7 @@ AS := mips-linux-gnu-as
 ASFLAGS := -mips3 -march vr4300 -I include
 OBJCOPY := mips-linux-gnu-objcopy
 LD := mips-linux-gnu-ld
-CC := ido-static-recomp-main/build/5.3/out/cc
+CC := tools/ido5.3/cc
 OPT_FLAGS := -O2 -mips2 -Olimit 2000
 $(OUTPUT)/src/libultra/io/%.o: OPT_FLAGS := -O1 -mips2
 $(OUTPUT)/src/libultra/os/%.o: OPT_FLAGS := -O1 -mips2
@@ -15,6 +15,8 @@ $(OUTPUT)/src/libultra/gu/%.o: OPT_FLAGS := -O3 -mips2
 $(OUTPUT)/src/libultra/audio/%.o: OPT_FLAGS := -O3 -mips2
 CCFLAGS = -Xcpluscomm $(OPT_FLAGS) -I include -I include/libultra -I include/libultra/PR -DTARGET_N64 -D_FINALROM -DF3DEX_GBI -DNDEBUG -non_shared -c -Wab,-r4300_mul -G 0
 PYTHON := python3
+DIFF := diff
+SPLAT := splat split "dukenukem.yaml"
 
 OBJECTS := \
     $(OUTPUT)/header.o \
@@ -331,32 +333,32 @@ OBJECTS := \
     $(OUTPUT)/data/ucode/asp_data.o \
     $(OUTPUT)/data/ucode/boot.o \
 
-
-dukenukem.bin : $(OUTPUT)/dukenukem.elf
+$(OUTPUT)/dukenukem.bin : $(OUTPUT)/dukenukem.elf
 	$(OBJCOPY) -O binary $< $@
-	
+	@$(DIFF) "Duke Nukem 64 (U) [!].z64" $(OUTPUT)/dukenukem.bin && printf "OK\n" || (echo 'The build succeeded, but did not match the base ROM.' && false)
+
 $(OUTPUT)/%.o : %.c
 	@mkdir -p $(@D)
-	$(PYTHON) ./asm-processor/build.py $(CC) -- $(AS) $(ASFLAGS) -- $(CCFLAGS) -o $@ $<
-	
+	$(PYTHON) ./tools/asm-processor/build.py $(CC) -- $(AS) $(ASFLAGS) -- $(CCFLAGS) -o $@ $<
+
 $(OUTPUT)/src/libultra/gu/%.o : src/libultra/gu/%.c
 	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -o $@ $<
-	
+
 $(OUTPUT)/src/libultra/libc/%.o : src/libultra/libc/%.c
 	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -o $@ $<
-	
+
 $(OUTPUT)/src/libultra/libc/ll.o : src/libultra/libc/ll.c
 	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -o $@ $<
 	$(PYTHON) tools/set_o32abi_bit.py $@
-	
+
 $(OUTPUT)/src/libultra/libc/llcvt.o : src/libultra/libc/llcvt.c
 	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -o $@ $<
 	$(PYTHON) tools/set_o32abi_bit.py $@
-	
+
 $(OUTPUT)/src/libultra/audio/%.o : src/libultra/audio/%.c
 	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -o $@ $<
@@ -370,8 +372,22 @@ $(OUTPUT)/%.o : %.bin
 	$(LD) -r -b binary -o $@ $<
 
 $(OUTPUT)/dukenukem.elf : $(OBJECTS)
-	$(LD) -T undefined_syms.txt -T dukenukem.ld -Map dukenukem.map -o $(OUTPUT)/dukenukem.elf
+	$(LD) -T undefined_syms.txt -T dukenukem.ld -Map $(OUTPUT)/dukenukem.map -o $(OUTPUT)/dukenukem.elf
 
-all: dukenukem.bin
+all: $(OUTPUT)/dukenukem.bin
 
-objects: $(OBJECTS)
+split:
+	$(SPLAT)
+
+distclean: clean
+	rm -rf assets/
+	rm -rf asm/
+	rm -rf data/
+	rm -rf nonmatchings/
+	rm -rf dukenukem.ld
+	rm -rf header.s
+	rm -rf undefined_funcs_auto.txt
+	rm -rf undefined_syms_auto.txt
+
+clean:
+	rm -rf $(OUTPUT)
