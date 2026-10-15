@@ -2,10 +2,6 @@
 asm/
 assets/
 build/
-data/
-nonmatchings/
-tools/ido5.3
 dukenukem.ld
-header.s
 *_auto.txt
 *.z64

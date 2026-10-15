@@ -270,7 +270,7 @@ rcp:
 	beqz t1, vi
 
 	lw t4, PHYS_TO_K1(SP_STATUS_REG)
-	li t1, (SP_CLR_INTR | SP_CLR_SIG3)
+	li t1, (SP_CLR_INTR)
 	
 	andi t4, t4, 0x300
 	andi s1, s1, 0x3e
@@ -442,6 +442,7 @@ panic:
 	li a0, MESG(OS_EVENT_FAULT)
 	jal send_mesg
 	j __osDispatchThread
+END(__osException)
 	
 LEAF(send_mesg)
 	la t2, __osEventStateTab

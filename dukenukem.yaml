@@ -12,6 +12,8 @@ options:
   generate_asm_macros_files: False
   src_path: .
   migrate_rodata_to_functions: True
+  hasm_in_src_path: True
+  find_file_boundaries: False
 
 segments:
   - name: header
@@ -22,35 +24,35 @@ segments:
     type: bin
     start: 0x40
 
-  - name: entry
+  - name: framebuffer
     type: code
     start: 0x1000
-    vram: 0x8004B400
+    vram: 0x80000400
+    bss_size: 0x4B000
     subsegments:
-      - [0x1000, hasm, src/entry]
+      - { type: bss, vram: 0x80000400, name: src/framebuffer }
 
   - name: main
     type: code
-    start: 0x1050
-    vram: 0x8004B450
-    follows_vram: entry
+    start: 0x1000
+    vram: 0x8004B400
     bss_size: 0x1A3B30
     subsegments:
-      - [0x1050, c, src/main]
-      - [0x2010, c, src/sched]
-      - [0x2B80, asm, src/control]
-      - [0x3550, asm, src/game1]
-      - [0x7450, asm, src/control2]
-      - [0x7940, asm, src/game2]
-      - [0xB280, asm, src/logo]
-      - [0xBD50, asm, src/boss2]
-      - [0xC9B0, asm, src/sound1]
-      - [0xDEF0, asm, src/sound2]
-      - [0xF020, c, src/rend1]
-      - [0x111F0, asm, src/rend2]
+      - [0x1000, asm, entrypoint]
+      - [0x01050, c, src/main]
+      - [0x02010, c, src/sched]
+      - [0x02B80, c, src/control]
+      - [0x03550, c, src/game1]
+      - [0x07450, c, src/control2]
+      - [0x07940, c, src/game2]
+      - [0x0B280, c, src/logo]
+      - [0x0BD50, c, src/boss2]
+      - [0x0C9B0, c, src/sound1]
+      - [0x0DEF0, c, src/sound2]
+      - [0x0F020, c, src/rend1]
+      - [0x111F0, c, src/rend2]
       - [0x24020, c, src/getangle]
       - [0x242B0, c, src/draw]
-      - [auto, c, src/tileinfo]
       - [0x25CF0, c, src/rnc]
       - [0x268B0, c, src/display1]
       - [0x273F0, c, src/cache1d]
@@ -59,7 +61,6 @@ segments:
       - [0x392F0, c, src/actors2]
       - [0x3D4E0, c, src/actors3]
       - [0x3F3E0, c, src/gamedef]
-      - [auto, c, src/script]
       - [0x45520, c, src/engine]
       - [0x4F060, c, src/game3]
       - [0x52E40, c, src/game4]
@@ -70,17 +71,15 @@ segments:
       - [0x62500, c, src/sector]
       - [0x6A880, c, src/board]
       - [0x6AA50, c, src/tile]
-      - [auto, c, src/tables]
       - [0x6AB40, c, src/dukebot]
-      - [0x6D2A0, asm, src/menues]
- #     - [auto, asm, global]
+      - [0x6D2A0, c, src/menues]
       - [0x706E0, c, src/libultra/io/viblack]
       - [0x70750, c, src/libultra/os/initialize]
       - [0x709E0, c, src/libultra/os/createthread]
       - [0x70B30, c, src/libultra/os/startthread]
       - [0x70C80, c, src/libultra/io/pimgr]
       - [0x70E10, c, src/libultra/os/setthreadpri]
-      - [0x70EF0, asm, src/libultra/os/writebackdcacheall]
+      - [0x70EF0, hasm, src/libultra/os/writebackdcacheall]
       - [0x70F20, c, src/libultra/io/pigetstat]
       - [0x70F30, c, src/libultra/io/pidma]
       - [0x71040, c, src/libultra/os/recvmesg]
@@ -90,13 +89,12 @@ segments:
       - [0x71390, c, src/libultra/libc/ll]
       - [0x71650, c, src/libultra/io/visetyscale]
       - [0x716B0, c, src/libultra/io/vimgr]
-      - [0x71A10, c, src/libultra/io/vitbl]
-      - [0x71A10, asm, src/libultra/unk1]
+      - [0x71A10, hasm, src/libultra/os/parameters]
       - [0x71A70, c, src/libultra/io/visetmode]
       - [0x71AE0, c, src/libultra/io/visetspecial]
       - [0x71CA0, c, src/libultra/os/seteventmesg]
       - [0x71D10, c, src/libultra/io/visetevent]
-      - [0x71D80, asm, src/libultra/os/setintmask]
+      - [0x71D80, hasm, src/libultra/os/setintmask]
       - [0x71E20, c, src/libultra/io/sptaskyielded]
       - [0x71EA0, c, src/libultra/io/vigetcurrframebuf]
       - [0x71EE0, c, src/libultra/io/vigetnextframebuf]
@@ -153,20 +151,20 @@ segments:
       - [0x78FC0, c, src/libultra/gu/lookat]
       - [0x792F0, c, src/libultra/gu/lookatref]
       - [0x797B0, c, src/libultra/gu/mtxcatf]
-      - [0x799C0, asm, src/libultra/gu/sqrtf]
-      - [0x799D0, asm, src/libultra/os/interrupt]
+      - [0x799C0, hasm, src/libultra/gu/sqrtf]
+      - [0x799D0, hasm, src/libultra/os/interrupt]
       - [0x79A10, c, src/libultra/io/vi]
-      - [0x79B50, asm, src/libultra/os/setsr]
-      - [0x79B60, asm, src/libultra/os/getsr]
-      - [0x79B70, asm, src/libultra/os/setfpccsr]
+      - [0x79B50, hasm, src/libultra/os/setsr]
+      - [0x79B60, hasm, src/libultra/os/getsr]
+      - [0x79B70, hasm, src/libultra/os/setfpccsr]
       - [0x79B80, c, src/libultra/io/sirawread]
       - [0x79BD0, c, src/libultra/io/sirawwrite]
-      - [0x79C20, asm, src/libultra/os/exceptasm]
-      - [0x7A530, asm, src/libultra/os/writebackdcache]
-      - [0x7A5B0, asm, src/libultra/os/invalicache]
-      - [0x7A630, asm, src/libultra/os/maptlbrdb]
+      - [0x79C20, hasm, src/libultra/os/exceptasm]
+      - [0x7A530, hasm, src/libultra/os/writebackdcache]
+      - [0x7A5B0, hasm, src/libultra/os/invalicache]
+      - [0x7A630, hasm, src/libultra/os/maptlbrdb]
       - [0x7A690, c, src/libultra/io/pirawread]
-      - [0x7A6F0, asm, src/libultra/libc/bzero]
+      - [0x7A6F0, hasm, src/libultra/libc/bzero]
       - [0x7A790, c, src/libultra/os/thread]
       - [0x7A7D0, c, src/libultra/io/cartrominit]
       - [0x7A8C0, c, src/libultra/io/leodiskinit]
@@ -177,12 +175,12 @@ segments:
       - [0x7ADB0, c, src/libultra/io/devmgr]
       - [0x7B240, c, src/libultra/os/jammesg]
       - [0x7B390, c, src/libultra/io/pigetcmdq]
-      - [0x7B3C0, asm, src/libultra/os/getcount]
+      - [0x7B3C0, hasm, src/libultra/os/getcount]
       - [0x7B3D0, c, src/libultra/os/timerintr]
       - [0x7B7D0, c, src/libultra/io/vigetcurrcontext]
       - [0x7B7E0, c, src/libultra/io/viswapcontext]
       - [0x7BB40, c, src/libultra/io/spgetstat]
-      - [0x7BB50, asm, src/libultra/libc/bcopy]
+      - [0x7BB50, hasm, src/libultra/libc/bcopy]
       - [0x7BE60, c, src/libultra/io/spsetstat]
       - [0x7BE70, c, src/libultra/io/spsetpc]
       - [0x7BEB0, c, src/libultra/io/sprawdma]
@@ -201,7 +199,7 @@ segments:
       - [0x7E6C0, c, src/libultra/gu/mtxutil]
       - [0x7E930, c, src/libultra/libc/xprintf]
       - [0x7F5F0, c, src/libultra/gu/normalize]
-      - [0x7F680, asm, src/libultra/os/probetlb]
+      - [0x7F680, hasm, src/libultra/os/probetlb]
       - [0x7F740, c, src/libultra/audio/syndelete]
       - [0x7F750, c, src/libultra/audio/event]
       - [0x7FA90, c, src/libultra/audio/synaddplayer]
@@ -226,19 +224,15 @@ segments:
       - [0x84100, c, src/libultra/audio/save]
       - [0x841C0, c, src/libultra/io/ai]
       - [0x841F0, c, src/libultra/io/si]
-      - [auto, c, src/libultra/os/kdebugserver]
       - [0x84220, c, src/libultra/io/leointerrupt]
       - [0x84AA0, c, src/libultra/os/destroythread]
       - [0x84BA0, c, src/libultra/os/resetglobalintmask]
       - [0x84C00, c, src/libultra/io/epirawwrite]
       - [0x84C50, c, src/libultra/io/epirawread]
       - [0x84CA0, c, src/libultra/os/setglobalintmask]
-      - [0x84CF0, asm, src/libultra/os/setcompare]
-      - [0x84D00, asm, src/libultra/os/invaldcache]
-      - [auto, c, src/libultra/io/vimodepallan1]
-      - [auto, c, src/libultra/io/vimodempallan1]
-      - [auto, c, src/libultra/io/vimodentsclan1]
-      #- [auto, c, src/libultra/gu/libm_vals]
+      - [0x84CF0, hasm, src/libultra/os/setcompare]
+      - [0x84D00, hasm, src/libultra/os/invaldcache]
+      - [auto, hasm, src/libultra/gu/libm_vals]
       - [0x84DB0, c, src/libultra/libc/xlitob]
       - [0x85050, c, src/libultra/libc/xldtob]
       - [0x85B10, c, src/libultra/audio/copy]
@@ -289,7 +283,7 @@ segments:
       - [0xB7D40, .data, src/libultra/audio/sl]
       - [0xB7D50, .data, src/libultra/io/aisetnextbuf]
       - [0xB7D60, .data, src/libultra/io/vi]
-      - [0xB7DD0, data, src/libultra/os/exceptasm]
+      - [0xB7DD0, .data, src/libultra/os/exceptasm]
       - [0xB7DF0, .data, src/libultra/os/thread]
       - [0xB7E10, .data, src/libultra/io/piacs]
       - [0xB7E20, .data, src/libultra/os/timerintr]
@@ -303,15 +297,15 @@ segments:
       - [0xB8250, .data, src/libultra/libc/xlitob]
       - [0xB8280, .rodata, src/main]
       - [0xB8320, .rodata, src/sched]
-      - [0xB8340, rodata, src/control]
-      - [0xB8450, rodata, src/game1]
-      - [0xB9470, rodata, src/control2]
-      - [0xB9490, rodata, src/game2]
-      - [0xB9C60, rodata, src/logo]
-      - [0xBA1B0, rodata, src/boss2]
-      - [0xBA200, rodata, src/sound1]
+      - [0xB8340, .rodata, src/control]
+      - [0xB8450, .rodata, src/game1]
+      - [0xB9470, .rodata, src/control2]
+      - [0xB9490, .rodata, src/game2]
+      - [0xB9C60, .rodata, src/logo]
+      - [0xBA1B0, .rodata, src/boss2]
+      - [0xBA200, .rodata, src/sound1]
       - [0xBA340, .rodata, src/rend1]
-      - [0xBA4D0, rodata, src/rend2]
+      - [0xBA4D0, .rodata, src/rend2]
       - [0xBAD30, .rodata, src/getangle]
       - [0xBAD50, .rodata, src/draw]
       - [0xBAD90, .rodata, src/cache1d]
@@ -330,8 +324,8 @@ segments:
       - [0xBE110, .rodata, src/sector]
       - [0xBEDF0, .rodata, src/board]
       - [0xBEE10, .rodata, src/dukebot]
-      - [0xBEF00, rodata, src/menues]
-      - [0xBF490, rodata, src/libultra/os/setintmask]
+      - [0xBEF00, .rodata, src/menues]
+      - [0xBF490, .rodata, src/libultra/os/setintmask]
       - [0xBF510, .rodata, src/libultra/gu/rotate]
       - [0xBF520, .rodata, src/libultra/audio/sndplayer]
       - [0xBF560, .rodata, src/libultra/audio/csplayer]
@@ -342,7 +336,7 @@ segments:
       - [0xBF860, .rodata, src/libultra/libc/llcvt]
       - [0xBF870, .rodata, src/libultra/gu/perspective]
       - [0xBF880, .rodata, src/libultra/gu/lookatref]
-      - [0xBF890, rodata, src/libultra/os/exceptasm]
+      - [0xBF890, .rodata, src/libultra/os/exceptasm]
       - [0xBF8E0, .rodata, src/libultra/io/devmgr]
       - [0xBF900, .rodata, src/libultra/libc/xprintf]
       - [0xBFA00, .rodata, src/libultra/audio/seqplayer]
@@ -350,7 +344,7 @@ segments:
       - [0xBFC50, .rodata, src/libultra/audio/drvrNew]
       - [0xBFC70, .rodata, src/libultra/audio/resample]
       - [0xBFCB0, .rodata, src/libultra/audio/env]
-      - [0xBFD10, rodata, src/libultra/gu/libm_vals]
+      - [0xBFD10, .rodata, src/libultra/gu/libm_vals]
       - [0xBFD20, .rodata, src/libultra/libc/xldtob]
       - [0xBFD80, .rodata, src/libultra/audio/seq]
       - [0xBFD90, .rodata, src/libultra/audio/reverb]
@@ -394,7 +388,24 @@ segments:
       - { type: .bss, vram: 0x802AD600, name: src/libultra/os/kdebugserver }
       - { type: .bss, vram: 0x802AD7B0, name: src/libultra/io/leointerrupt }
 
-  - name: palette
+  - name: palettes
+    type: code
+    start: 0xC0880
+    vram: 0x802AE7B0
+    bss_size: 0x19F0
+    follows_vram: main
+    subsegments:
+      - { type: bss, vram: 0x802AE7B0, name: src/palettes }
+
+  - name: zbuffer
+    type: code
+    start: 0xC0880
+    vram: 0x803DA800
+    bss_size: 0x25800
+    subsegments:
+      - { type: bss, vram: 0x803DA800, name: src/zbuffer }
+
+  - name: static
     type: code
     start: 0xC0880
     vram: 0x01000000
@@ -459,9 +470,5 @@ segments:
       - [0x7BBFC0, bin, musicseq]
       - [0x7BC6E0, bin, musicctl]
       - [0x7BD580, bin, musictbl]
-
-#  - type: bin
-#    start: 0xC0880
-#    follows_vram: main
 
   - [0x800000]

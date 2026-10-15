@@ -9,6 +9,7 @@ LEAF(__osDisableInt)
 	nop
 	jr ra
     nop
+END(__osDisableInt)
 	
 LEAF(__osRestoreInt)
 	mfc0 t0, C0_SR
@@ -18,4 +19,5 @@ LEAF(__osRestoreInt)
     nop
 	jr ra
 	nop
+END(__osRestoreInt)
 	

@@ -51,16 +51,18 @@ PRINT := printf '
 ENDLINE := \n'
 
 ### Compiler Options ###
-ASFLAGS   := -w -nostdinc -c -G 0 -march=vr4300 -mgp32 -mfp32 -mno-abicalls -mips3 -D_LANGUAGE_ASSEMBLY
+ASFLAGS     := -w -nostdinc -c -G 0 -march=vr4300 -mgp32 -mfp32 -mno-abicalls -mips3 -D_LANGUAGE_ASSEMBLY
 
-CFLAGS    := -c -Wab,-r4300_mul -G 0 -nostdinc -Xcpluscomm -non_shared -D_LANGUAGE_C
+IDO_ASFLAGS := -c -Wab,-r4300_mul -G 0 -nostdinc -non_shared -D_LANGUAGE_ASSEMBLY
 
-CPPFLAGS  := -I include -I include/libultra -I include/libultra/PR \
-		     -DTARGET_N64 -D_FINALROM -DF3DEX_GBI -DNDEBUG -D_MIPS_SZLONG=32
+IDO_CFLAGS  := -c -Wab,-r4300_mul -G 0 -nostdinc -Xcpluscomm -non_shared -D_LANGUAGE_C
 
-OPTFLAGS  := -O2 -mips2 -Olimit 2000
+CPPFLAGS    := -I include -I include/libultra -I include/libultra/PR \
+		       -DTARGET_N64 -D_FINALROM -DF3DEX_GBI -DNDEBUG -D_MIPS_SZLONG=32
 
-LDFLAGS   := -T undefined_funcs_auto.txt -T undefined_syms_auto.txt -T undefined_syms.txt -T $(LD_SCRIPT) -Map $(LD_MAP)
+OPTFLAGS    := -O2 -mips2 -Olimit 2000
+
+LDFLAGS     := -T undefined_funcs_auto.txt -T undefined_syms_auto.txt -T $(LD_SCRIPT) -Map $(LD_MAP)
 
 # Object files
 OBJECTS := $(shell grep -E 'build.+\.o' $(LD_SCRIPT) -o)
@@ -68,7 +70,8 @@ OBJECTS := $(OBJECTS:build/%=$(BUILD_DIR)/%)
 
 ### Targets ###
 $(BUILD_DIR)/src/libultra/io/%.c.o: OPTFLAGS := -O1 -mips2
-$(BUILD_DIR)/src/libultra/os/%.c.o: OPTFLAGS := -O1 -mips2
+$(BUILD_DIR)/src/libultra/os/%.o: OPTFLAGS := -O1 -mips2
+$(BUILD_DIR)/src/libultra/os/exceptasm.s.o: OPTFLAGS := -O1 -mips3 -32
 $(BUILD_DIR)/src/libultra/libc/%.c.o: OPTFLAGS := -O3 -mips2
 $(BUILD_DIR)/src/libultra/libc/ll.c.o: OPTFLAGS := -O1 -mips3 -o32
 $(BUILD_DIR)/src/libultra/libc/llcvt.c.o: OPTFLAGS := -O1 -mips3 -o32
@@ -96,18 +99,25 @@ setup: distclean split
 $(BUILD_DIR)/%.c.o: %.c
 	@$(PRINT)$(GREEN)Compiling C file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
 	@mkdir -p $(shell dirname $@)
-	$(V)$(ASM_PROCESSOR) $(CC) -- $(AS) $(ASFLAGS) -- $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) -o $@ $<
+	$(V)$(ASM_PROCESSOR) $(CC) -- $(AS) $(ASFLAGS) -- $(IDO_CFLAGS) $(CPPFLAGS) $(OPTFLAGS) -o $@ $<
 
 $(BUILD_DIR)/src/libultra/%.c.o: src/libultra/%.c
 	@$(PRINT)$(GREEN)Compiling C file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
 	@mkdir -p $(shell dirname $@)
-	$(V)$(CC) $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) -o $@ $<
+	$(V)$(CC) $(IDO_CFLAGS) $(CPPFLAGS) $(OPTFLAGS) -o $@ $<
 	$(V)$(O32_TOOL) $@
 
 $(BUILD_DIR)/asm/%.s.o: asm/%.s
 	@$(PRINT)$(GREEN)Assembling asm file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
 	@mkdir -p $(shell dirname $@)
 	$(V)$(AS) $(ASFLAGS) $(CPPFLAGS) -o $@ $<
+
+$(BUILD_DIR)/src/libultra/%.s.o: src/libultra/%.s
+	@$(PRINT)$(GREEN)Assembling asm file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(shell dirname $@)
+	$(V)$(CC) $(IDO_ASFLAGS) $(CPPFLAGS) $(OPTFLAGS) -o $@ $<
+	$(V)$(OBJCOPY) --remove-section .mdebug $@
+	$(V)$(O32_TOOL) $@
 
 $(BUILD_DIR)/%.bin.o: %.bin
 	@$(PRINT)$(GREEN)objcopying binary file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)

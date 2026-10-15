@@ -32,7 +32,7 @@ s64 prevtime = 0;
 
 char D_8010AC80;
 polygondata_t *polygondata;
-char D_8010AC88[16384];
+char stack[16384];
 OSThread idleThread;
 char D_8010EE38[16384];
 OSThread mainThread;
@@ -75,8 +75,8 @@ char D_801C4840[19120]; // fixme
 
 extern char game_inactive;
 
-extern char D_80000400[1]; // framebuffer
-extern char D_803DA800[1]; // depth buffer
+extern u16 framebuffer[2][320*240];
+extern u16 zbuffer[320*240];
 
 extern short D_801012C8;
 extern short D_801012CC;
@@ -86,17 +86,15 @@ extern short D_801012D0;
 extern int totalclock;
 extern int totalclocklock;
 
-extern char dl_0[1];
-extern char dl_1[1];
+extern char dl_0[];
+extern char dl_1[];
 
-extern char palettes[1];
+extern char palettes[];
 
-extern char palettes_rom[1];
-extern char palettes_rom_end[1];
+extern char static_ROM_START[];
+extern char static_ROM_END[];
 
-void osCreateScheduler2(OSSched* sc, void* stack, OSPri priority,
-	u8 numFields);
-
+void osCreateScheduler2(OSSched* sc, void* stack, OSPri priority, u8 numFields);
 
 void idle(void*);
 void mainproc(void*);
@@ -195,9 +193,9 @@ void determineclockfreq(void)
 
 void func_8004B704()
 {
-	gDPSetDepthImage(pkt++, OS_K0_TO_PHYSICAL(D_803DA800));
+	gDPSetDepthImage(pkt++, OS_K0_TO_PHYSICAL(zbuffer));
 	gDPSetCycleType(pkt++, G_CYC_FILL);
-	gDPSetColorImage(pkt++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, OS_K0_TO_PHYSICAL(D_803DA800));
+	gDPSetColorImage(pkt++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, OS_K0_TO_PHYSICAL(zbuffer));
 	gDPSetFillColor(pkt++, GPACK_ZDZ(G_MAXFBZ, 0) << 16 | GPACK_ZDZ(G_MAXFBZ, 0));
 	gDPScisFillRectangle(pkt++, 0, 0, 319, 239);
 	gDPPipeSync(pkt++);
@@ -207,7 +205,7 @@ void func_8004B704()
 void func_8004B7D4()
 {
 	gDPSetCycleType(pkt++, G_CYC_FILL);
-	gDPSetColorImage(pkt++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, OS_K0_TO_PHYSICAL(D_80000400 + 0x25800 * framecounter));
+	gDPSetColorImage(pkt++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, OS_K0_TO_PHYSICAL(framebuffer[framecounter]));
 	gDPSetFillColor(pkt++, GPACK_RGBA5551(0,0,0,1) << 16 | GPACK_RGBA5551(0,0,0,1));
 	gDPScisFillRectangle(pkt++, 0, 0, 319, 239);
 }
@@ -286,7 +284,7 @@ void set_gfxdata(void)
 
 	gSPSegment(pkt++, 0, 0);
 	gSPSegment(pkt++, 1, OS_K0_TO_PHYSICAL(paletteoffset));
-	gSPSegment(pkt++, 2, OS_K0_TO_PHYSICAL(D_80000400 + framecounter * 0x25800));
+	gSPSegment(pkt++, 2, OS_K0_TO_PHYSICAL(framebuffer[framecounter]));
 
 	//gSPDisplayList(pkt++, SEGMENT_ADDR(1, 0x1888));
 	//gSPDisplayList(pkt++, SEGMENT_ADDR(1, 0x1860));
@@ -328,7 +326,7 @@ void creategfxtask(void)
 	task->flags = OS_SC_NEEDS_RDP | OS_SC_NEEDS_RSP | OS_SC_LAST_TASK | OS_SC_SWAPBUFFER;
 	task->msgQ = &contr_msqueue;
 	task->msg = &D_800D36D0;
-	task->framebuffer = (void*)(&D_80000400 + (framecounter * 0x25800));
+	task->framebuffer = (void*)&framebuffer[framecounter];
 	osWritebackDCacheAll();
 	osSendMesg(osScGetCmdQ(&scheduler), task, OS_MESG_BLOCK);
 }
@@ -343,11 +341,11 @@ void mainproc(void* a1)
 {
 	osCreateMesgQueue(&D_80123620, D_801236B0, 8);
 	paletteoffset = palettes;
-	if ((u32)paletteoffset + (u32)palettes_rom_end - (u32)palettes_rom > (u32)0x802c5000)
+	if ((u32)paletteoffset + (u32)static_ROM_END - (u32)static_ROM_START > (u32)0x802c5000)
 	{
 		while(1) {}
 	}
-	copyfromrom(palettes, (u32)palettes_rom, (u32)palettes_rom_end - (u32)palettes_rom);
+	copyfromrom(palettes, (u32)static_ROM_START, (u32)static_ROM_END - (u32)static_ROM_START);
 	osCreateScheduler2(&scheduler, &D_8011F5D0[16384], 64, 1);
 	osCreateThread(&contThread, 5, controllerThread, a1, &D_80117198[16384], 20);
 	osCreateThread(&audioThread, 6, __amMain, a1, &D_8011B348[16384], 30);
