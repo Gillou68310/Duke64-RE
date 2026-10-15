@@ -1998,5 +1998,5 @@ void processinput(short snum)
     }
 }
 #else
-#pragma GLOBAL_ASM("nonmatchings/src/player1/processinput.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/player1/processinput.s")
 #endif

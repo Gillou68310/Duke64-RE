@@ -797,7 +797,7 @@ void displayweapon(short snum)
 
 }
 #else
-#pragma GLOBAL_ASM("nonmatchings/src/display2/displayweapon.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/display2/displayweapon.s")
 
 short D_800EE888[] = { 0,1,1,0,0 };
 char D_800EE894[] = { 0,0,0,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2 };

@@ -402,7 +402,7 @@ void mainproc(void* a1)
 	}
 }
 #else
-#pragma GLOBAL_ASM("nonmatchings/src/main/mainproc.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/main/mainproc.s")
 #endif
 
 void controllerThread(void* a1)

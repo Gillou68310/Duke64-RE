@@ -531,5 +531,5 @@ void computergetinput(long snum, input *syn)
     }
 }
 #else
-#pragma GLOBAL_ASM("nonmatchings/src/dukebot/computergetinput.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/dukebot/computergetinput.s")
 #endif

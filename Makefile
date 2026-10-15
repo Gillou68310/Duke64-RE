@@ -1,375 +1,136 @@
-OUTPUT := build
+### Build Options ###
+BASEROM	:= baserom.z64
+TARGET := dukenukem
+COMPARE ?= 1
+VERBOSE ?= 0
+BUILD_DIR := build
 
-AS := mips-linux-gnu-as
-ASFLAGS := -mips3 -march vr4300 -I include
-OBJCOPY := mips-linux-gnu-objcopy
-LD := mips-linux-gnu-ld
-CC := tools/ido5.3/cc
-OPT_FLAGS := -O2 -mips2 -Olimit 2000
-$(OUTPUT)/src/libultra/io/%.o: OPT_FLAGS := -O1 -mips2
-$(OUTPUT)/src/libultra/os/%.o: OPT_FLAGS := -O1 -mips2
-$(OUTPUT)/src/libultra/libc/%.o: OPT_FLAGS := -O3 -mips2
-$(OUTPUT)/src/libultra/libc/ll.o: OPT_FLAGS := -O1 -mips3 -o32
-$(OUTPUT)/src/libultra/libc/llcvt.o: OPT_FLAGS := -O1 -mips3 -o32
-$(OUTPUT)/src/libultra/gu/%.o: OPT_FLAGS := -O3 -mips2
-$(OUTPUT)/src/libultra/audio/%.o: OPT_FLAGS := -O3 -mips2
-CCFLAGS = -Xcpluscomm $(OPT_FLAGS) -I include -I include/libultra -I include/libultra/PR -DTARGET_N64 -D_FINALROM -DF3DEX_GBI -DNDEBUG -non_shared -c -Wab,-r4300_mul -G 0
-PYTHON := python3
-DIFF := diff
-SPLAT := splat split "dukenukem.yaml"
+# Fail early if baserom does not exist
+ifeq ($(wildcard $(BASEROM)),)
+$(error Baserom `$(BASEROM)' not found.)
+endif
 
-OBJECTS := \
-    $(OUTPUT)/header.o \
-    $(OUTPUT)/assets/boot.o \
-    $(OUTPUT)/src/entry.o \
-    $(OUTPUT)/src/main.o \
-    $(OUTPUT)/src/sched.o \
-    $(OUTPUT)/asm/control.o \
-    $(OUTPUT)/asm/game1.o \
-    $(OUTPUT)/asm/control2.o \
-    $(OUTPUT)/asm/game2.o \
-    $(OUTPUT)/asm/logo.o \
-    $(OUTPUT)/asm/boss2.o \
-    $(OUTPUT)/asm/sound1.o \
-    $(OUTPUT)/asm/sound2.o \
-    $(OUTPUT)/src/rend1.o \
-    $(OUTPUT)/asm/rend2.o \
-    $(OUTPUT)/src/getangle.o \
-    $(OUTPUT)/src/draw.o \
-    $(OUTPUT)/src/tileinfo.o \
-    $(OUTPUT)/src/rnc.o \
-    $(OUTPUT)/src/display1.o \
-    $(OUTPUT)/src/cache1d.o \
-    $(OUTPUT)/src/display2.o \
-    $(OUTPUT)/src/actors1.o \
-    $(OUTPUT)/src/actors2.o \
-    $(OUTPUT)/src/actors3.o \
-    $(OUTPUT)/src/gamedef.o \
-    $(OUTPUT)/src/script.o \
-    $(OUTPUT)/src/engine.o \
-    $(OUTPUT)/src/game3.o \
-    $(OUTPUT)/src/game4.o \
-    $(OUTPUT)/src/player1.o \
-    $(OUTPUT)/src/player2.o \
-    $(OUTPUT)/src/player3.o \
-    $(OUTPUT)/src/premap.o \
-    $(OUTPUT)/src/sector.o \
-    $(OUTPUT)/src/board.o \
-    $(OUTPUT)/src/tile.o \
-    $(OUTPUT)/src/tables.o \
-    $(OUTPUT)/src/dukebot.o \
-    $(OUTPUT)/asm/menues.o \
-    $(OUTPUT)/src/libultra/io/viblack.o \
-    $(OUTPUT)/src/libultra/os/initialize.o \
-    $(OUTPUT)/src/libultra/os/createthread.o \
-    $(OUTPUT)/src/libultra/os/startthread.o \
-    $(OUTPUT)/src/libultra/io/pimgr.o \
-    $(OUTPUT)/src/libultra/os/setthreadpri.o \
-    $(OUTPUT)/asm/libultra/os/writebackdcacheall.o \
-    $(OUTPUT)/src/libultra/io/pigetstat.o \
-    $(OUTPUT)/src/libultra/io/pidma.o \
-    $(OUTPUT)/src/libultra/os/recvmesg.o \
-    $(OUTPUT)/src/libultra/os/gettime.o \
-    $(OUTPUT)/src/libultra/os/sendmesg.o \
-    $(OUTPUT)/src/libultra/os/createmesgqueue.o \
-    $(OUTPUT)/src/libultra/libc/ll.o \
-    $(OUTPUT)/src/libultra/io/visetyscale.o \
-    $(OUTPUT)/src/libultra/io/vimgr.o \
-    $(OUTPUT)/asm/libultra/unk1.o \
-    $(OUTPUT)/src/libultra/io/vitbl.o \
-    $(OUTPUT)/src/libultra/io/visetmode.o \
-    $(OUTPUT)/src/libultra/io/visetspecial.o \
-    $(OUTPUT)/src/libultra/os/seteventmesg.o \
-    $(OUTPUT)/src/libultra/io/visetevent.o \
-    $(OUTPUT)/asm/libultra/os/setintmask.o \
-    $(OUTPUT)/src/libultra/io/sptaskyielded.o \
-    $(OUTPUT)/src/libultra/io/vigetcurrframebuf.o \
-    $(OUTPUT)/src/libultra/io/vigetnextframebuf.o \
-    $(OUTPUT)/src/libultra/io/viswapbuf.o \
-    $(OUTPUT)/src/libultra/io/sptask.o \
-    $(OUTPUT)/src/libultra/io/dpsetnextbuf.o \
-    $(OUTPUT)/src/libultra/io/sptaskyield.o \
-    $(OUTPUT)/src/libultra/io/contreaddata.o \
-    $(OUTPUT)/src/libultra/io/controller.o \
-    $(OUTPUT)/src/libultra/io/pfsinitpak.o \
-    $(OUTPUT)/src/libultra/io/pfsnumfiles.o \
-    $(OUTPUT)/src/libultra/io/pfsfreeblocks.o \
-    $(OUTPUT)/src/libultra/io/motor.o \
-    $(OUTPUT)/src/libultra/gu/translate.o \
-    $(OUTPUT)/src/libultra/gu/scale.o \
-    $(OUTPUT)/src/libultra/libc/sprintf.o \
-    $(OUTPUT)/src/libultra/libc/string.o \
-    $(OUTPUT)/src/libultra/io/pfsfilestate.o \
-    $(OUTPUT)/src/libultra/os/yieldthread.o \
-    $(OUTPUT)/src/libultra/io/pfsdeletefile.o \
-    $(OUTPUT)/src/libultra/io/pfsallocatefile.o \
-    $(OUTPUT)/src/libultra/io/pfsreadwritefile.o \
-    $(OUTPUT)/src/libultra/io/pfssearchfile.o \
-    $(OUTPUT)/src/libultra/io/pfsrepairid.o \
-    $(OUTPUT)/src/libultra/gu/rotate.o \
-    $(OUTPUT)/src/libultra/os/virtualtophysical.o \
-    $(OUTPUT)/src/libultra/audio/sl.o \
-    $(OUTPUT)/src/libultra/audio/heapalloc.o \
-    $(OUTPUT)/src/libultra/audio/heapinit.o \
-    $(OUTPUT)/src/libultra/io/aisetfreq.o \
-    $(OUTPUT)/src/libultra/audio/sndplayer.o \
-    $(OUTPUT)/src/libultra/audio/bnkf.o \
-    $(OUTPUT)/src/libultra/audio/sndpallocate.o \
-    $(OUTPUT)/src/libultra/audio/csplayer.o \
-    $(OUTPUT)/src/libultra/audio/seqpsetbank.o \
-    $(OUTPUT)/src/libultra/audio/cspsetvol.o \
-    $(OUTPUT)/src/libultra/audio/sndpsetsound.o \
-    $(OUTPUT)/src/libultra/audio/sndpgetstate.o \
-    $(OUTPUT)/src/libultra/audio/sndpsetpitch.o \
-    $(OUTPUT)/src/libultra/audio/sndpsetpan.o \
-    $(OUTPUT)/src/libultra/audio/sndpsetvol.o \
-    $(OUTPUT)/src/libultra/audio/sndpplay.o \
-    $(OUTPUT)/src/libultra/audio/cspstop.o \
-    $(OUTPUT)/src/libultra/audio/cseq.o \
-    $(OUTPUT)/src/libultra/audio/cspsetseq.o \
-    $(OUTPUT)/src/libultra/audio/cspplay.o \
-    $(OUTPUT)/src/libultra/audio/sndpstop.o \
-    $(OUTPUT)/src/libultra/audio/synthesizer.o \
-    $(OUTPUT)/src/libultra/io/aisetnextbuf.o \
-    $(OUTPUT)/src/libultra/gu/sinf.o \
-    $(OUTPUT)/src/libultra/gu/cosf.o \
-    $(OUTPUT)/src/libultra/libc/llcvt.o \
-    $(OUTPUT)/src/libultra/gu/perspective.o \
-    $(OUTPUT)/src/libultra/gu/lookat.o \
-    $(OUTPUT)/src/libultra/gu/lookatref.o \
-    $(OUTPUT)/src/libultra/gu/mtxcatf.o \
-    $(OUTPUT)/asm/libultra/gu/sqrtf.o \
-    $(OUTPUT)/asm/libultra/os/interrupt.o \
-    $(OUTPUT)/src/libultra/io/vi.o \
-    $(OUTPUT)/asm/libultra/os/setsr.o \
-    $(OUTPUT)/asm/libultra/os/getsr.o \
-    $(OUTPUT)/asm/libultra/os/setfpccsr.o \
-    $(OUTPUT)/src/libultra/io/sirawread.o \
-    $(OUTPUT)/src/libultra/io/sirawwrite.o \
-    $(OUTPUT)/asm/libultra/os/exceptasm.o \
-    $(OUTPUT)/asm/libultra/os/writebackdcache.o \
-    $(OUTPUT)/asm/libultra/os/invalicache.o \
-    $(OUTPUT)/asm/libultra/os/maptlbrdb.o \
-    $(OUTPUT)/src/libultra/io/pirawread.o \
-    $(OUTPUT)/asm/libultra/libc/bzero.o \
-    $(OUTPUT)/src/libultra/os/thread.o \
-    $(OUTPUT)/src/libultra/io/cartrominit.o \
-    $(OUTPUT)/src/libultra/io/leodiskinit.o \
-    $(OUTPUT)/src/libultra/io/piacs.o \
-    $(OUTPUT)/src/libultra/os/getthreadpri.o \
-    $(OUTPUT)/src/libultra/io/pirawdma.o \
-    $(OUTPUT)/src/libultra/io/epirawdma.o \
-    $(OUTPUT)/src/libultra/io/devmgr.o \
-    $(OUTPUT)/src/libultra/os/jammesg.o \
-    $(OUTPUT)/src/libultra/io/pigetcmdq.o \
-    $(OUTPUT)/asm/libultra/os/getcount.o \
-    $(OUTPUT)/src/libultra/os/timerintr.o \
-    $(OUTPUT)/src/libultra/io/vigetcurrcontext.o \
-    $(OUTPUT)/src/libultra/io/viswapcontext.o \
-    $(OUTPUT)/src/libultra/io/spgetstat.o \
-    $(OUTPUT)/asm/libultra/libc/bcopy.o \
-    $(OUTPUT)/src/libultra/io/spsetstat.o \
-    $(OUTPUT)/src/libultra/io/spsetpc.o \
-    $(OUTPUT)/src/libultra/io/sprawdma.o \
-    $(OUTPUT)/src/libultra/io/sp.o \
-    $(OUTPUT)/src/libultra/io/dp.o \
-    $(OUTPUT)/src/libultra/io/siacs.o \
-    $(OUTPUT)/src/libultra/io/sirawdma.o \
-    $(OUTPUT)/src/libultra/os/settimer.o \
-    $(OUTPUT)/src/libultra/io/pfsgetstatus.o \
-    $(OUTPUT)/src/libultra/io/contpfs.o \
-    $(OUTPUT)/src/libultra/io/contramread.o \
-    $(OUTPUT)/src/libultra/io/pfschecker.o \
-    $(OUTPUT)/src/libultra/io/pfsisplug.o \
-    $(OUTPUT)/src/libultra/io/crc.o \
-    $(OUTPUT)/src/libultra/io/contramwrite.o \
-    $(OUTPUT)/src/libultra/gu/mtxutil.o \
-    $(OUTPUT)/src/libultra/libc/xprintf.o \
-    $(OUTPUT)/src/libultra/gu/normalize.o \
-    $(OUTPUT)/asm/libultra/os/probetlb.o \
-    $(OUTPUT)/src/libultra/audio/syndelete.o \
-    $(OUTPUT)/src/libultra/audio/event.o \
-    $(OUTPUT)/src/libultra/audio/synaddplayer.o \
-    $(OUTPUT)/src/libultra/audio/synallocvoice.o \
-    $(OUTPUT)/src/libultra/audio/synstartvoice.o \
-    $(OUTPUT)/src/libultra/audio/synsetpan.o \
-    $(OUTPUT)/src/libultra/audio/synsetvol.o \
-    $(OUTPUT)/src/libultra/audio/synsetpitch.o \
-    $(OUTPUT)/src/libultra/audio/synsetfxmix.o \
-    $(OUTPUT)/src/libultra/audio/synstopvoice.o \
-    $(OUTPUT)/src/libultra/audio/synfreevoice.o \
-    $(OUTPUT)/src/libultra/audio/seqplayer.o \
-    $(OUTPUT)/src/libultra/audio/cents2ratio.o \
-    $(OUTPUT)/src/libultra/audio/synstartvoiceparam.o \
-    $(OUTPUT)/src/libultra/audio/drvrNew.o \
-    $(OUTPUT)/src/libultra/audio/synallocfx.o \
-    $(OUTPUT)/src/libultra/audio/mainbus.o \
-    $(OUTPUT)/src/libultra/audio/load.o \
-    $(OUTPUT)/src/libultra/audio/resample.o \
-    $(OUTPUT)/src/libultra/audio/env.o \
-    $(OUTPUT)/src/libultra/audio/auxbus.o \
-    $(OUTPUT)/src/libultra/audio/save.o \
-    $(OUTPUT)/src/libultra/io/ai.o \
-    $(OUTPUT)/src/libultra/io/si.o \
-    $(OUTPUT)/src/libultra/os/kdebugserver.o \
-    $(OUTPUT)/src/libultra/io/leointerrupt.o \
-    $(OUTPUT)/src/libultra/os/destroythread.o \
-    $(OUTPUT)/src/libultra/os/resetglobalintmask.o \
-    $(OUTPUT)/src/libultra/io/epirawwrite.o \
-    $(OUTPUT)/src/libultra/io/epirawread.o \
-    $(OUTPUT)/src/libultra/os/setglobalintmask.o \
-    $(OUTPUT)/asm/libultra/os/setcompare.o \
-    $(OUTPUT)/asm/libultra/os/invaldcache.o \
-    $(OUTPUT)/src/libultra/io/vimodepallan1.o \
-    $(OUTPUT)/src/libultra/io/vimodempallan1.o \
-    $(OUTPUT)/src/libultra/io/vimodentsclan1.o \
-    $(OUTPUT)/src/libultra/libc/xlitob.o \
-    $(OUTPUT)/src/libultra/libc/xldtob.o \
-    $(OUTPUT)/src/libultra/audio/copy.o \
-    $(OUTPUT)/src/libultra/audio/seq.o \
-    $(OUTPUT)/src/libultra/audio/synsetpriority.o \
-    $(OUTPUT)/src/libultra/audio/filter.o \
-    $(OUTPUT)/src/libultra/audio/reverb.o \
-    $(OUTPUT)/src/libultra/libc/ldiv.o \
-    $(OUTPUT)/data/asm/control.data.o \
-    $(OUTPUT)/data/asm/game1.data.o \
-    $(OUTPUT)/data/asm/control2.data.o \
-    $(OUTPUT)/data/asm/game2.data.o \
-    $(OUTPUT)/data/asm/logo.data.o \
-    $(OUTPUT)/data/asm/boss2.data.o \
-    $(OUTPUT)/data/asm/sound1.data.o \
-    $(OUTPUT)/data/asm/sound2.data.o \
-    $(OUTPUT)/data/src/rend1.data.o \
-    $(OUTPUT)/data/asm/rend2.data.o \
-    $(OUTPUT)/data/asm/menues.data.o \
-    $(OUTPUT)/data/asm/global.data.o \
-    $(OUTPUT)/data/asm/libultra/os/exceptasm.data.o \
-    $(OUTPUT)/data/asm/control.rodata.o \
-    $(OUTPUT)/data/asm/game1.rodata.o \
-    $(OUTPUT)/data/asm/control2.rodata.o \
-    $(OUTPUT)/data/asm/game2.rodata.o \
-    $(OUTPUT)/data/asm/logo.rodata.o \
-    $(OUTPUT)/data/asm/boss2.rodata.o \
-    $(OUTPUT)/data/asm/sound1.rodata.o \
-    $(OUTPUT)/data/asm/rend2.rodata.o \
-    $(OUTPUT)/data/asm/menues.rodata.o \
-    $(OUTPUT)/data/asm/libultra/os/setintmask.rodata.o \
-    $(OUTPUT)/data/asm/libultra/os/exceptasm.rodata.o \
-    $(OUTPUT)/data/asm/libultra/gu/libm_vals.rodata.o \
-    $(OUTPUT)/data/asm/control.bss.o \
-    $(OUTPUT)/data/asm/game1.bss.o \
-    $(OUTPUT)/data/asm/control2.bss.o \
-    $(OUTPUT)/data/asm/game2.bss.o \
-    $(OUTPUT)/data/asm/boss2.bss.o \
-    $(OUTPUT)/data/asm/sound1.bss.o \
-    $(OUTPUT)/data/src/rend1.bss.o \
-    $(OUTPUT)/data/asm/rend2.bss.o \
-    $(OUTPUT)/data/asm/menues.bss.o \
-    $(OUTPUT)/data/asm/global.bss.o \
-    $(OUTPUT)/data/asm/global2.bss.o \
-    $(OUTPUT)/assets/palette.o \
-    $(OUTPUT)/src/dlstatic.o \
-    $(OUTPUT)/assets/tileblob.o \
-    $(OUTPUT)/assets/board01.o \
-    $(OUTPUT)/assets/board02.o \
-    $(OUTPUT)/assets/board03.o \
-    $(OUTPUT)/assets/board04.o \
-    $(OUTPUT)/assets/board06.o \
-    $(OUTPUT)/assets/board05.o \
-    $(OUTPUT)/assets/board07.o \
-    $(OUTPUT)/assets/board09.o \
-    $(OUTPUT)/assets/board10.o \
-    $(OUTPUT)/assets/board11.o \
-    $(OUTPUT)/assets/board12.o \
-    $(OUTPUT)/assets/board13.o \
-    $(OUTPUT)/assets/board14.o \
-    $(OUTPUT)/assets/board15.o \
-    $(OUTPUT)/assets/board16.o \
-    $(OUTPUT)/assets/board17.o \
-    $(OUTPUT)/assets/board18.o \
-    $(OUTPUT)/assets/board19.o \
-    $(OUTPUT)/assets/board20.o \
-    $(OUTPUT)/assets/board21.o \
-    $(OUTPUT)/assets/board22.o \
-    $(OUTPUT)/assets/board23.o \
-    $(OUTPUT)/assets/board24.o \
-    $(OUTPUT)/assets/board25.o \
-    $(OUTPUT)/assets/board26.o \
-    $(OUTPUT)/assets/board27.o \
-    $(OUTPUT)/assets/board28.o \
-    $(OUTPUT)/assets/board30.o \
-    $(OUTPUT)/assets/board08.o \
-    $(OUTPUT)/assets/board29.o \
-    $(OUTPUT)/assets/board31.o \
-    $(OUTPUT)/assets/board32.o \
-    $(OUTPUT)/assets/board33.o \
-    $(OUTPUT)/assets/board34.o \
-    $(OUTPUT)/assets/soundctl.o \
-    $(OUTPUT)/assets/soundtbl.o \
-    $(OUTPUT)/assets/musicseq.o \
-    $(OUTPUT)/assets/musicctl.o \
-    $(OUTPUT)/assets/musictbl.o \
-    $(OUTPUT)/data/ucode/rdp.o \
-    $(OUTPUT)/data/ucode/asp.o \
-    $(OUTPUT)/data/ucode/rdp_data.o \
-    $(OUTPUT)/data/ucode/asp_data.o \
-    $(OUTPUT)/data/ucode/boot.o \
+ifeq ($(VERBOSE),0)
+V := @
+endif
 
-$(OUTPUT)/dukenukem.bin : $(OUTPUT)/dukenukem.elf
-	$(OBJCOPY) -O binary $< $@
-	@$(DIFF) "Duke Nukem 64 (U) [!].z64" $(OUTPUT)/dukenukem.bin && printf "OK\n" || (echo 'The build succeeded, but did not match the base ROM.' && false)
+### Output ###
+ROM       := $(BUILD_DIR)/$(TARGET).z64
+ELF       := $(BUILD_DIR)/$(TARGET).elf
+LD_SCRIPT := $(TARGET).ld
+LD_MAP    := $(BUILD_DIR)/$(TARGET).map
 
-$(OUTPUT)/%.o : %.c
-	@mkdir -p $(@D)
-	$(PYTHON) ./tools/asm-processor/build.py $(CC) -- $(AS) $(ASFLAGS) -- $(CCFLAGS) -o $@ $<
+### Tools ###
+PYTHON        := python3
+N64CKSUM      := $(PYTHON) tools/n64cksum.py
+ASM_PROCESSOR := $(PYTHON) tools/asm-processor/build.py
+O32_TOOL      := $(PYTHON) tools/set_o32abi_bit.py
+SPLAT_YAML    := $(TARGET).yaml
+SPLAT         := splat split $(SPLAT_YAML)
+DIFF          := diff
 
-$(OUTPUT)/src/libultra/gu/%.o : src/libultra/gu/%.c
-	@mkdir -p $(@D)
-	$(CC) $(CCFLAGS) -o $@ $<
+CROSS   := mips-linux-gnu-
+AS      := $(CROSS)gcc -x assembler-with-cpp
+LD      := $(CROSS)ld
+OBJCOPY := $(CROSS)objcopy
+CPP     := $(CROSS)cpp
+CC      := tools/ido5.3/cc
 
-$(OUTPUT)/src/libultra/libc/%.o : src/libultra/libc/%.c
-	@mkdir -p $(@D)
-	$(CC) $(CCFLAGS) -o $@ $<
+PRINT := printf '
+ ENDCOLOR := \033[0m
+ WHITE     := \033[0m
+ ENDWHITE  := $(ENDCOLOR)
+ GREEN     := \033[0;32m
+ ENDGREEN  := $(ENDCOLOR)
+ BLUE      := \033[0;34m
+ ENDBLUE   := $(ENDCOLOR)
+ YELLOW    := \033[0;33m
+ ENDYELLOW := $(ENDCOLOR)
+ PURPLE    := \033[0;35m
+ ENDPURPLE := $(ENDCOLOR)
+ENDLINE := \n'
 
-$(OUTPUT)/src/libultra/libc/ll.o : src/libultra/libc/ll.c
-	@mkdir -p $(@D)
-	$(CC) $(CCFLAGS) -o $@ $<
-	$(PYTHON) tools/set_o32abi_bit.py $@
+### Compiler Options ###
+ASFLAGS   := -w -nostdinc -c -G 0 -march=vr4300 -mgp32 -mfp32 -mno-abicalls -mips3 -D_LANGUAGE_ASSEMBLY
 
-$(OUTPUT)/src/libultra/libc/llcvt.o : src/libultra/libc/llcvt.c
-	@mkdir -p $(@D)
-	$(CC) $(CCFLAGS) -o $@ $<
-	$(PYTHON) tools/set_o32abi_bit.py $@
+CFLAGS    := -c -Wab,-r4300_mul -G 0 -nostdinc -Xcpluscomm -non_shared -D_LANGUAGE_C
 
-$(OUTPUT)/src/libultra/audio/%.o : src/libultra/audio/%.c
-	@mkdir -p $(@D)
-	$(CC) $(CCFLAGS) -o $@ $<
+CPPFLAGS  := -I include -I include/libultra -I include/libultra/PR \
+		     -DTARGET_N64 -D_FINALROM -DF3DEX_GBI -DNDEBUG -D_MIPS_SZLONG=32
 
-$(OUTPUT)/%.o : %.s
-	@mkdir -p $(@D)
-	$(AS) $(ASFLAGS) $< -o $@
+OPTFLAGS  := -O2 -mips2 -Olimit 2000
 
-$(OUTPUT)/%.o : %.bin
-	@mkdir -p $(@D)
-	$(LD) -r -b binary -o $@ $<
+LDFLAGS   := -T undefined_funcs_auto.txt -T undefined_syms_auto.txt -T undefined_syms.txt -T $(LD_SCRIPT) -Map $(LD_MAP)
 
-$(OUTPUT)/dukenukem.elf : $(OBJECTS)
-	$(LD) -T undefined_syms.txt -T dukenukem.ld -Map $(OUTPUT)/dukenukem.map -o $(OUTPUT)/dukenukem.elf
+# Object files
+OBJECTS := $(shell grep -E 'build.+\.o' $(LD_SCRIPT) -o)
+OBJECTS := $(OBJECTS:build/%=$(BUILD_DIR)/%)
 
-all: $(OUTPUT)/dukenukem.bin
+### Targets ###
+$(BUILD_DIR)/src/libultra/io/%.c.o: OPTFLAGS := -O1 -mips2
+$(BUILD_DIR)/src/libultra/os/%.c.o: OPTFLAGS := -O1 -mips2
+$(BUILD_DIR)/src/libultra/libc/%.c.o: OPTFLAGS := -O3 -mips2
+$(BUILD_DIR)/src/libultra/libc/ll.c.o: OPTFLAGS := -O1 -mips3 -o32
+$(BUILD_DIR)/src/libultra/libc/llcvt.c.o: OPTFLAGS := -O1 -mips3 -o32
+$(BUILD_DIR)/src/libultra/gu/%.c.o: OPTFLAGS := -O3 -mips2
+$(BUILD_DIR)/src/libultra/audio/%.c.o: OPTFLAGS := -O3 -mips2
 
-split:
-	$(SPLAT)
-
-distclean: clean
-	rm -rf assets/
-	rm -rf asm/
-	rm -rf data/
-	rm -rf nonmatchings/
-	rm -rf dukenukem.ld
-	rm -rf header.s
-	rm -rf undefined_funcs_auto.txt
-	rm -rf undefined_syms_auto.txt
+all: $(ROM)
 
 clean:
-	rm -rf $(OUTPUT)
+	$(V)rm -rf $(BUILD_DIR)
+
+distclean: clean
+	$(V)rm -rf assets/
+	$(V)rm -rf asm/
+	$(V)rm -f $(LD_SCRIPT)
+	$(V)rm -f undefined_funcs_auto.txt
+	$(V)rm -f undefined_syms_auto.txt
+
+split:
+	$(V)$(SPLAT)
+
+setup: distclean split
+
+# Compile .c files
+$(BUILD_DIR)/%.c.o: %.c
+	@$(PRINT)$(GREEN)Compiling C file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(shell dirname $@)
+	$(V)$(ASM_PROCESSOR) $(CC) -- $(AS) $(ASFLAGS) -- $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) -o $@ $<
+
+$(BUILD_DIR)/src/libultra/%.c.o: src/libultra/%.c
+	@$(PRINT)$(GREEN)Compiling C file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(shell dirname $@)
+	$(V)$(CC) $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) -o $@ $<
+	$(V)$(O32_TOOL) $@
+
+$(BUILD_DIR)/asm/%.s.o: asm/%.s
+	@$(PRINT)$(GREEN)Assembling asm file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(shell dirname $@)
+	$(V)$(AS) $(ASFLAGS) $(CPPFLAGS) -o $@ $<
+
+$(BUILD_DIR)/%.bin.o: %.bin
+	@$(PRINT)$(GREEN)objcopying binary file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(shell dirname $@)
+	$(V)$(LD) -r -b binary -o $@ $<
+
+$(ELF): $(OBJECTS)
+	@$(PRINT)$(GREEN)Linking elf file: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(LD) $(LDFLAGS) -o $@
+
+$(ROM): $(ELF)
+	$(V)$(OBJCOPY) -O binary --gap-fill 0x00 --pad-to 0x800000 $< $@
+	$(V)$(N64CKSUM) $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(BASEROM) $(ROM) && printf "OK\n" || (echo 'The build succeeded, but did not match the base ROM. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
+
+### Make Settings ###
+
+.PHONY: all clean distclean setup split
+
+# Remove built-in implicit rules to improve performance
+MAKEFLAGS += --no-builtin-rules
+
+# Print target for debugging
+print-% : ; $(info $* is a $(flavor $*) variable set to [$($*)]) @true

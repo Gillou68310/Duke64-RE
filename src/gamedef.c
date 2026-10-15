@@ -1619,7 +1619,7 @@ char parse(void)
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("nonmatchings/src/gamedef/parse.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/gamedef/parse.s")
 #endif
 
 void execute(short i,short p,long x)

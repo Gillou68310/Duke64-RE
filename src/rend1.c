@@ -20,11 +20,11 @@ extern unsigned short viswall[512];
 extern float viswallr1[512];
 extern float viswallr2[512];
 
-#pragma GLOBAL_ASM("nonmatchings/src/rend1/func_80059420.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/rend1/func_80059420.s")
 
-#pragma GLOBAL_ASM("nonmatchings/src/rend1/func_80059468.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/rend1/func_80059468.s")
 
-#pragma GLOBAL_ASM("nonmatchings/src/rend1/func_800594A8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/rend1/func_800594A8.s")
 
 float anglemod(float a)
 {
@@ -58,7 +58,7 @@ float getanglef2(float x1, float y1, float x2, float y2)
     return 270.0f - (getanglef(y2 - y1, x2 - x1) * 57.29577637f);
 }
 
-#pragma GLOBAL_ASM("nonmatchings/src/rend1/scansector.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/rend1/scansector.s")
 
 char viswallcheck(int w, float f1, float f2)
 {
@@ -73,7 +73,7 @@ char viswallcheck(int w, float f1, float f2)
     return 1;
 }
 
-#pragma GLOBAL_ASM("nonmatchings/src/rend1/drawrooms_.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/rend1/drawrooms_.s")
 
 void _memcpy(void *dst, void *src, unsigned long size)
 {
@@ -479,6 +479,6 @@ void resetboardtimer(void)
     boardtimer = 0;
 }
 
-#pragma GLOBAL_ASM("nonmatchings/src/rend1/demoinput.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/rend1/demoinput.s")
 
-#pragma GLOBAL_ASM("nonmatchings/src/rend1/D_80104740.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/src/rend1/D_80104740.s")

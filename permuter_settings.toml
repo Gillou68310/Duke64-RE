@@ -1,8 +1,8 @@
 
 compiler_type = "ido"
 
-compiler_command = "python3 ./tools/asm-processor/build.py tools/ido5.3/cc -- mips-linux-gnu-as -mips3 -march vr4300 -I include -- -Xcpluscomm -O2 -mips2 -Olimit 2000 -I include -I include/libultra -I include/libultra/PR -DTARGET_N64 -D_FINALROM -DF3DEX_GBI -DNDEBUG -non_shared -c -Wab,-r4300_mul -G 0"
-assembler_command = "mips-linux-gnu-as -mips3 -march vr4300 -I include"
+compiler_command = "tools/ido5.3/cc -O2 -mips2 -Olimit 2000 -c -Wab,-r4300_mul -G 0 -nostdinc -Xcpluscomm -non_shared -D_LANGUAGE_C -I include -I include/libultra -I include/libultra/PR -DTARGET_N64 -D_FINALROM -DF3DEX_GBI -DNDEBUG -D_MIPS_SZLONG=32"
+assembler_command = "mips-linux-gnu-gcc -x assembler-with-cpp -w -nostdinc -c -G 0 -march=vr4300 -mgp32 -mfp32 -mno-abicalls -mips3 -D_LANGUAGE_ASSEMBLY -I include -I include/libultra -I include/libultra/PR -DTARGET_N64 -D_FINALROM -DF3DEX_GBI -DNDEBUG -D_MIPS_SZLONG=32"
 
 [preserve_macros]
 "_*gs?[DS]P.*" = "void"
