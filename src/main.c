@@ -1,11 +1,6 @@
 #include "common.h"
-#include "os.h"
-#include "rcp.h"
 #include "sched.h"
-#include "gbi.h"
-#include "ucode.h"
-
-#define min(a,b) ((a) < (b) ? (a) : (b))
+#include "duke3d.h"
 
 typedef struct {
 	char _f_[16];
@@ -73,17 +68,14 @@ char D_801C4430[16]; // unused?
 char D_801C4440[SP_DRAM_STACK_SIZE8];
 char D_801C4840[19120]; // fixme
 
-extern char game_inactive;
-
-extern u16 framebuffer[2][320*240];
-extern u16 zbuffer[320*240];
+extern u16 framebuffer[2][SCREEN_WIDTH*SCREEN_HEIGHT];
+extern u16 zbuffer[SCREEN_WIDTH*SCREEN_HEIGHT];
 
 extern short D_801012C8;
 extern short D_801012CC;
 extern char D_801CB922;
 extern short D_801012D0;
 
-extern int totalclock;
 extern int totalclocklock;
 
 extern char dl_0[];
@@ -341,7 +333,7 @@ void mainproc(void* a1)
 {
 	osCreateMesgQueue(&D_80123620, D_801236B0, 8);
 	paletteoffset = palettes;
-	if ((u32)paletteoffset + (u32)static_ROM_END - (u32)static_ROM_START > (u32)0x802c5000)
+	if ((u32)paletteoffset + (u32)static_ROM_END - (u32)static_ROM_START > (u32)VERTEXBASE)
 	{
 		while(1) {}
 	}

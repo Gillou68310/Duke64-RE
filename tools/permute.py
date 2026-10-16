@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-import urllib.request
-import urllib.parse
 from io import BytesIO
+import requests
 
 import subprocess
 import tempfile
@@ -12,7 +11,7 @@ import os
 
 def download_decompme(url_str, dir):
     try:
-        parsed_url = urllib.parse.urlparse(url_str)
+        parsed_url = requests.compat.urlparse(url_str)
         slug = parsed_url.path[1:].split("/")[1]
     except Exception:
         print(
@@ -22,15 +21,12 @@ def download_decompme(url_str, dir):
 
     print(f"Downloading scratch with ID {slug}...")
     try:
-        response_str = urllib.request.urlopen(f"{api_base}/api/scratch/{slug}")
-
-        content = urllib.request.urlopen(
-            f"{api_base}/api/scratch/{slug}/export"
-        )
-        zip = zipfile.ZipFile(BytesIO(content.read()))
+        response = requests.get(f"{api_base}/api/scratch/{slug}")
+        export = requests.get(f"{api_base}/api/scratch/{slug}/export")
+        zip = zipfile.ZipFile(BytesIO(export.content))
         zip.extractall(dir)
-    except Exception:
-        print("Failed to download scratch from decomp.me")
+    except Exception as e:
+        print(f"Failed to download scratch from decomp.me: {e}")
         sys.exit(1)
 
 def get_function_name(path):
@@ -73,4 +69,4 @@ if __name__ == "__main__":
     
     subprocess.run(['tools/decomp-permuter/import.py', code, target])
     tempdir.cleanup()
-    subprocess.run(['tools/decomp-permuter/permuter.py', '--best-only', '--stop-on-zero', '-j12', nonmatching])
+    subprocess.run(['tools/decomp-permuter/permuter.py', '--best-only', '--stop-on-zero', '--stack-diffs', '-j12', nonmatching])

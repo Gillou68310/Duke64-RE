@@ -26,9 +26,7 @@ Prepared for public release: 03/21/2003 - Charlie Wiederhold, 3D Realms
 */
 //-------------------------------------------------------------------------
 
-#include "os.h"
-#include "mbi.h"
-#include "gbi.h"
+#include "ultra64.h"
 #include "pragmas.h"
 #include "build.h"
 #include "names.h"
@@ -37,6 +35,16 @@ Prepared for public release: 03/21/2003 - Charlie Wiederhold, 3D Realms
 #ifndef NULL
 #define NULL 0
 #endif
+
+#define printf
+#define exit(A) while(1)
+
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
+
+#define VERTEXBASE ((vertex_t*)0x802C5000)
+#define TEMP_AREA_ADDR (0x8035A800)
+#define ZBUFFER_ADDR (0x803DA800)
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -504,5 +512,19 @@ extern int globalposx;
 extern int globalposy;
 extern int globalposz;
 extern short globalsectnum;
+
+extern float sky_re;
+extern float sky_r;
+extern float sky_ge;
+extern float sky_g;
+extern float sky_be;
+extern float sky_b;
+
+extern s32 drawceilcnt;
+extern s32 drawfloorcnt;
+extern s32 drawwallcnt;
+extern u16 drawwalllist[256];
+
+extern u8 D_80101364;
 
 #include "funct.h"

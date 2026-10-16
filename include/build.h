@@ -80,7 +80,7 @@ typedef struct
 	short point2, nextwall, nextsector, cstat;
 	short picnum, overpicnum;
 	short lotag, hitag, extra;
-	short unk;
+	unsigned short sectnum;
 	signed char shade;
 	char pal, xrepeat, yrepeat, xpanning, ypanning;
 	char pad[2];
@@ -119,24 +119,21 @@ typedef struct
 typedef struct
 {
 	int romoff;
-	int waloff;
+	void *ramaddr;
 	int picanm;
 	short tilesizx;
 	short tilesizy;
 	unsigned short memsiz;
 	unsigned short dim1;
 	unsigned short dim2;
-	unsigned short flags;
+	unsigned char flags;
 	unsigned short tile;
-	unsigned short unk;
 } tileinfo_t;
 
 typedef struct
 {
 	short x, y, z, u, v;
 } vertex_t;
-
-#define VERTEXBASE ((vertex_t*)0x802C5000)
 
 EXTERN sectortype sector[MAXSECTORS];
 EXTERN walltype wall[MAXWALLS];
