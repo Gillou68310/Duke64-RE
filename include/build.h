@@ -80,7 +80,7 @@ typedef struct
 	short point2, nextwall, nextsector, cstat;
 	short picnum, overpicnum;
 	short lotag, hitag, extra;
-	short unk;
+	short sectnum;
 	signed char shade;
 	char pal, xrepeat, yrepeat, xpanning, ypanning;
 	char pad[2];
