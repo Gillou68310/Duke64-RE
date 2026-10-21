@@ -1,12 +1,8 @@
 #include "common.h"
-#include "os.h"
-#include "gbi.h"
-#include "mbi.h"
-
-extern Vp D_800D9A60[];
+#include "duke3d.h"
 
 Gfx dl_0[] = {
-	gsSPViewport(D_800D9A60),
+	gsSPViewport(viewport),
 	gsSPClearGeometryMode(G_SHADE | G_SHADING_SMOOTH | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD),
 	gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
 	gsSPSetGeometryMode(G_SHADE | G_SHADING_SMOOTH),

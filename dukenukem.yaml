@@ -30,7 +30,7 @@ segments:
     vram: 0x80000400
     bss_size: 0x4B000
     subsegments:
-      - { type: bss, vram: 0x80000400, name: src/framebuffer }
+      - { type: .bss, vram: 0x80000400, name: src/framebuffer }
 
   - name: main
     type: code
@@ -403,7 +403,7 @@ segments:
     vram: 0x803DA800
     bss_size: 0x25800
     subsegments:
-      - { type: bss, vram: 0x803DA800, name: src/zbuffer }
+      - { type: .bss, vram: 0x803DA800, name: src/zbuffer }
 
   - name: static
     type: code

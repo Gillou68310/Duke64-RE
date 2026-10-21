@@ -31,6 +31,10 @@ typedef struct
     wallvertex[i].v = (s32)V;      \
     i++;
 
+extern u16 globaltileid;
+extern f32 globaltilesizx;
+extern f32 globaltilesizy;
+extern f32 globaltiledimx;
 extern f32 globalxrepeat;
 extern f32 globalyrepeat;
 extern f32 globalxpanning;
@@ -50,7 +54,7 @@ extern s16 tilemap[MAXTILES];
 extern s32 D_800D9AEC;
 extern u8 D_8025F398[];
 extern char D_8025FEC0[];
-extern s32 D_8026EB40;
+extern s32 globalmapnum;
 extern u16 *D_8026EB94;
 extern u16 D_8026EB98;
 extern vertex_t wallvertex[12];
@@ -58,6 +62,13 @@ extern s32 D_8021E4CC;
 extern u16 D_8021D67E;
 extern s32 D_8021D700;
 extern s32 wallpolycount;
+extern f32 viewportscalex;
+extern f32 viewportscaley;
+extern f32 viewporttransx;
+extern f32 viewporttransy;
+extern f32 D_8025C380;
+extern s8 D_8026EC31;
+extern u16 globalpicnum;
 
 extern mapinfo_t mapinfo[];
 extern f32 D_800DA490;
@@ -76,7 +87,7 @@ void func_8005B5F0(int mapnum)
     s32 size;
     resetmovesectorinfo();
     resetboardtimer();
-    D_8026EB40 = mapnum;
+    globalmapnum = mapnum;
     if (mapinfo[mapnum].numwalls)
     {
     }
@@ -145,19 +156,19 @@ void func_8005B728(void)
     s32 count, i;
     void *sector_addr;
 
-    D_800DA490 = mapinfo[D_8026EB40].xpos;
-    D_800DA494 = mapinfo[D_8026EB40].ypos;
-    D_800DA498 = mapinfo[D_8026EB40].zpos;
+    D_800DA490 = mapinfo[globalmapnum].xpos;
+    D_800DA494 = mapinfo[globalmapnum].ypos;
+    D_800DA498 = mapinfo[globalmapnum].zpos;
     ps->posx = (D_800DA490 * 2);
     ps->posy = (D_800DA494 * 2);
     ps->posz = (D_800DA498 * 32);
-    ps->ang = mapinfo[D_8026EB40].ang;
+    ps->ang = mapinfo[globalmapnum].ang;
     ps->cursectnum = 4;
     ps->over_shoulder_on = 0;
-    sector_addr = mapinfo[D_8026EB40].sector_addr;
+    sector_addr = mapinfo[globalmapnum].sector_addr;
     RNCDecompress(sector_addr, (char *)sector);
-    RNCDecompress(mapinfo[D_8026EB40].wall_addr, (char *)wall);
-    RNCDecompress(mapinfo[D_8026EB40].sprite_addr, (char *)sprite);
+    RNCDecompress(mapinfo[globalmapnum].wall_addr, (char *)wall);
+    RNCDecompress(mapinfo[globalmapnum].sprite_addr, (char *)sprite);
     RNCDecompress((char *)TEMP_AREA_ADDR, (char *)VERTEXBASE);
     count = 0;
     for (i = 0; i < numsectors; i++)
@@ -184,11 +195,76 @@ void func_8005B934(void)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/display_game.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005BB48.s")
+void func_8005BB48(void)
+{
+    viewport[0].vp.vtrans[0] = SCREEN_WIDTH * 2;
+    viewport[0].vp.vtrans[1] = SCREEN_HEIGHT * 2;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005BB64.s")
+void func_8005BB64(Vp *vp)
+{
+    viewportscalex = (vp->vp.vscale[0] / 4);
+    viewportscaley = (vp->vp.vscale[1] / 4);
+    viewporttransx = (vp->vp.vtrans[0] / 4);
+    viewporttransy = (vp->vp.vtrans[1] / 4);
+    if (numplayers < 3)
+        D_8025C380 = 1.0f;
+    else
+        D_8025C380 = 0.75f;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005BC30.s")
+void func_8005BC30(u8 arg0)
+{
+    switch (numplayers)
+    {
+    case 1:
+        gSPViewport(pkt++, &viewport[7]);
+        gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 22, 16, 298, 224);
+        func_8005BB64(&viewport[7]);
+        break;
+    case 2:
+        switch (arg0)
+        {
+        case 0:
+            gSPViewport(pkt++, &viewport[5]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 22, 16, 298, 119);
+            func_8005BB64(&viewport[5]);
+            break;
+        case 1:
+            gSPViewport(pkt++, &viewport[6]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 22, 121, 298, 224);
+            func_8005BB64(&viewport[6]);
+            break;
+        }
+        break;
+    case 3:
+    case 4:
+        switch (arg0)
+        {
+        case 0:
+            gSPViewport(pkt++, &viewport[1]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 22, 16, 159, 119);
+            func_8005BB64(&viewport[1]);
+            break;
+        case 1:
+            gSPViewport(pkt++, &viewport[2]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 161, 16, 298, 119);
+            func_8005BB64(&viewport[2]);
+            break;
+        case 2:
+            gSPViewport(pkt++, &viewport[3]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 22, 121, 159, 224);
+            func_8005BB64(&viewport[3]);
+            break;
+        case 3:
+            gSPViewport(pkt++, &viewport[4]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 161, 121, 298, 224);
+            func_8005BB64(&viewport[4]);
+            break;
+        }
+        break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005BF2C.s")
 
@@ -205,7 +281,32 @@ void clearscreen(void)
     gDPSetTexturePersp(pkt++, G_TP_NONE);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005C390.s")
+void func_8005C390(s32 arg0)
+{
+    for (; arg0 >= 11; arg0 -= 11)
+        ;
+    for (; arg0 < 0; arg0 += 11)
+        ;
+    switch (arg0)
+    {
+    case 0:
+        gDPSetRenderMode(pkt++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+        break;
+    case 1:
+        gDPSetRenderMode(pkt++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+        break;
+    case 2:
+        gDPSetRenderMode(pkt++, G_RM_ZB_OPA_DECAL, G_RM_ZB_OPA_DECAL2);
+        break;
+    case 3:
+        gDPSetRenderMode(pkt++, G_RM_ZB_XLU_DECAL, G_RM_ZB_XLU_DECAL2);
+        break;
+    case 8:
+        gDPSetRenderMode(pkt++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+    default:
+        break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005C4D4.s")
 
@@ -241,7 +342,7 @@ void func_80061CB8(s16 tilenum)
         tilenum += animateoffs(_tilenum, 0);
 
     gDPLoadTextureBlock_4b(pkt++, loadtile(tilenum) + 32, G_IM_FMT_I,
-                           tileinfo[tilenum].dim1, tileinfo[tilenum].dim2, 0, 0, 0,
+                           tileinfo[tilenum].dimx, tileinfo[tilenum].dimy, 0, 0, 0,
                            tilemasks(tilenum), tilemaskt(tilenum), 0, 0);
 
     D_8021D67E = _tilenum;
@@ -254,7 +355,7 @@ void func_80061FC8(s16 tileid)
     {
         gDPLoadTLUT_pal16(pkt++, 0, loadtile(tileid));
         gDPLoadTextureBlock_4b(pkt++, loadtile(tileid) + 32, G_IM_FMT_CI,
-                               tileinfo[tileid].dim1, tileinfo[tileid].dim2, 0,
+                               tileinfo[tileid].dimx, tileinfo[tileid].dimy, 0,
                                G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
                                0, 0, 0, 0);
         D_8021E4CC++;
@@ -335,11 +436,11 @@ u8 *loadtile(u16 tileid)
     }
     if ((tileinfo[tileid].flags & 0x80) == 0x80)
     {
-        size = (tileinfo[tileid].dim1 * tileinfo[tileid].dim2);
+        size = (tileinfo[tileid].dimx * tileinfo[tileid].dimy);
     }
     else
     {
-        size = (((tileinfo[tileid].dim1 * tileinfo[tileid].dim2) / 2) + 0x20);
+        size = (((tileinfo[tileid].dimx * tileinfo[tileid].dimy) / 2) + 0x20);
     }
 
     if (size < 0)
@@ -371,7 +472,7 @@ u8 *loadtile(u16 tileid)
 
 u8 tilemasks(u16 tileid)
 {
-    switch (tileinfo[tileid].dim1)
+    switch (tileinfo[tileid].dimx)
     {
     case 1:
         return 0;
@@ -397,7 +498,7 @@ u8 tilemasks(u16 tileid)
 
 u8 tilemaskt(u16 tileid)
 {
-    switch (tileinfo[tileid].dim2)
+    switch (tileinfo[tileid].dimy)
     {
     case 1:
         return 0;
@@ -461,9 +562,36 @@ void gametext(s16 x, s16 y, char *string)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80064674.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/display_tileviewer.s")
+void display_tileviewer(void)
+{
+    char buffer[260];
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/cacheandtileinit.s")
+    gDPPipeSync(pkt++);
+    guTranslate(&viewinfo->_f_300, 0.0f, 0.0f, 0.0f);
+    guScale(&viewinfo->_f_380, 0.5f, 0.5f, 0.5f);
+
+    gSPMatrix(pkt++, OS_K0_TO_PHYSICAL(&viewinfo->_f_300), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(pkt++, OS_K0_TO_PHYSICAL(&viewinfo->_f_380), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+
+    gSPDisplayList(pkt++, &dl_2);
+    clearscreen();
+
+    gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    sprintf(buffer, "picnum %d\n", globalpicnum);
+    gametext(20, 20, buffer);
+    rotatesprite_simplest(160, 220, globalpicnum);
+    if (control_button[0] & CONT_LEFT)
+        globalpicnum--;
+
+    if (control_button[0] & CONT_RIGHT)
+        globalpicnum++;
+}
+
+void cacheandtileinit(void)
+{
+    initcache((s32)VERTEXBASE, (s32)ZBUFFER_ADDR - (s32)VERTEXBASE);
+    func_800637C8();
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/addexplosionmodel2.s")
 
@@ -481,11 +609,20 @@ void gametext(s16 x, s16 y, char *string)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/rotatesprite_simple.s")
 
+void func_80066170(void);
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80066170.s")
 
+void func_80066250(void);
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80066250.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/animatemodels.s")
+void animatemodels(void)
+{
+    if (globalmapnum == 27)
+        func_80056400();
+
+    func_80066170();
+    func_80066250();
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80066324.s")
 
@@ -500,9 +637,9 @@ void func_80066BE0(s32 arg0)
     s32 x1, y1, x2, y2;
 
     if (arg0 != 0)
-        D_8026EB94 = (u16 *)0x80000400;
+        D_8026EB94 = (*FRAMEBUFFER_ADDR)[0];
     else
-        D_8026EB94 = (u16 *)0x80025C00;
+        D_8026EB94 = (*FRAMEBUFFER_ADDR)[1];
 
     for (i = 0; i < drawwallcnt; i++)
     {
@@ -547,8 +684,16 @@ void func_800674EC(s32 x, s32 y, s32 arg2)
     }
 }
 
-void settileglobals(u16 tilenum);
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/settileglobals.s")
+void settileglobals(u16 tilenum)
+{
+    globaltileid = gettileid(tilenum);
+    globaltilesizx = tileinfo[globaltileid].tilesizx;
+    globaltilesizy = tileinfo[globaltileid].tilesizy;
+    globaltiledimx = tileinfo[globaltileid].dimx;
+    globaltiledimy = tileinfo[globaltileid].dimy;
+    globaltilescalex = globaltilesizx / globaltiledimx;
+    globaltilescaley = globaltilesizy / globaltiledimy;
+}
 
 void setwallglobals(u16 wallnum, s16 cstat)
 {
@@ -783,6 +928,22 @@ s32 drawmaskwall(u16 wallnum)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/rendertileworld.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/setfxcolor.s")
+void setfxcolor(u8 r1, u8 g1, u8 b1, u8 r2, u8 g2, u8 b2)
+{
+    gDPSetAlphaCompare(pkt++, G_AC_NONE);
+    gDPSetTextureLUT(pkt++, G_TT_NONE);
+    gDPSetRenderMode(pkt++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+    gDPSetCombineLERP(pkt++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
+                      PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+    D_8026EC31 = 1;
+    gDPSetPrimColor(pkt++, 0, 0, r1, g1, b1, 0xFF);
+    gDPSetEnvColor(pkt++, r2, g2, b2, 0xFF);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/unsetfxsprite.s")
+void unsetfxsprite(void)
+{
+    gDPSetAlphaCompare(pkt++, G_AC_THRESHOLD);
+    gDPSetTextureLUT(pkt++, G_TT_RGBA16);
+    gDPSetCombineMode(pkt++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+    D_8026EC31 = 0;
+}

@@ -124,8 +124,8 @@ typedef struct
 	short tilesizx;
 	short tilesizy;
 	unsigned short memsiz;
-	unsigned short dim1;
-	unsigned short dim2;
+	unsigned short dimx;
+	unsigned short dimy;
 	unsigned char flags;
 	unsigned short tile;
 } tileinfo_t;

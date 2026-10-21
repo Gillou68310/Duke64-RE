@@ -1,3 +1,17 @@
+globalpicnum = 0x800DA4AC;
+globalmapnum = 0x8026EB40;
+globaltileid = 0x8026EBA0;
+globaltilesizx = 0x8026EBAC;
+globaltilesizy = 0x8026EBB0;
+globaltiledimx = 0x8026EBB4;
+D_8021E4D0 = 0x8021E4D0; // size:0xA0
+D_8021E570 = 0x8021E570; // size:0xA0
+D_8021E610 = 0x8021E610; // size:0x50
+viewport = 0x800D9A60; // size:0x80
+viewportscalex = 0x8025C370;
+viewportscaley = 0x8025C374;
+viewporttransx = 0x8025C378;
+viewporttransy = 0x8025C37C;
 tilemap = 0x8025C398;
 globalwallu1 = 0x8026EBBC;
 globalwallu2 = 0x8026EBC0;
