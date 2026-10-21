@@ -392,7 +392,7 @@ void moveactors(void)
                         for(l=0;l<16;l++)
                             RANDOMSCRAP;
                         spritesound(LASERTRIP_EXPLODE,i);
-                        addexplosionmodel2(s->x >> 1, s->y >> 1, s->z >> 5, 1);
+                        addsmoke(s->x >> 1, s->y >> 1, s->z >> 5, 1);
                         spawn(i,PIGCOP);
                         ps[p].actors_killed++;
                         KILLIT(i);

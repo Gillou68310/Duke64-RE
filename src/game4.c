@@ -29,8 +29,6 @@ Prepared for public release: 03/21/2003 - Charlie Wiederhold, 3D Realms
 #include "common.h"
 #include "duke3d.h"
 
-#include "common.h"
-
 long tempwallptr;
 short spawn( short j, short pn )
 {
@@ -745,23 +743,23 @@ short spawn( short j, short pn )
                     case DUKECAR:
                         break;
                     case SHOTSPARK1+4:
-                        addexplosionmodel2(sp->x >> 1, sp->y >> 1, sp->z >> 5, 1);
+                        addsmoke(sp->x >> 1, sp->y >> 1, sp->z >> 5, 1);
                         break;
                     case RPG:
                         addexplosionmodel(sp->x >> 1, sp->y >> 1, sp->z >> 5, 3);
-                        addexplosionmodel2(sp->x >> 1, sp->y >> 1, sp->z >> 5, 0);
+                        addsmoke(sp->x >> 1, sp->y >> 1, sp->z >> 5, 0);
                         break;
                     case TRIPBOMB:
-                        addexplosionmodel2(sp->x >> 1, sp->y >> 1, sp->z >> 5, 1);
+                        addsmoke(sp->x >> 1, sp->y >> 1, sp->z >> 5, 1);
                         break;
                     case HEAVYHBOMB:
                     case TILE3634:
                         addexplosionmodel(sp->x >> 1, sp->y >> 1, sp->z >> 5, 2);
-                        addexplosionmodel2(sp->x >> 1, sp->y >> 1, sp->z >> 5, 0);
+                        addsmoke(sp->x >> 1, sp->y >> 1, sp->z >> 5, 0);
                         break;
                     default:
                         addexplosionmodel(sp->x >> 1, sp->y >> 1, sp->z >> 5, 0);
-                        addexplosionmodel2(sp->x >> 1, sp->y >> 1, sp->z >> 5, 0);
+                        addsmoke(sp->x >> 1, sp->y >> 1, sp->z >> 5, 0);
                         break;
                 }
             case BURNING:

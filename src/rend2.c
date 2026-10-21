@@ -21,36 +21,49 @@ typedef struct
     /*0x3C*/ f32 sky_r;
     /*0x40*/ f32 sky_g;
     /*0x44*/ f32 sky_b;
-} mapinfo_t;
+} boardinfo_t;
 
-#define WALL_VERTEX(X, Y, Z, U, V) \
-    wallvertex[i].x = X >> 1;      \
-    wallvertex[i].z = Z >> 1;      \
-    wallvertex[i].y = Y >> 1;      \
-    wallvertex[i].u = (s32)U;      \
-    wallvertex[i].v = (s32)V;      \
-    i++;
+typedef struct
+{
+    /*0x00*/ s8 status;
+    /*0x01*/ s8 type;
+    /*0x02*/ s16 x;
+    /*0x04*/ s16 y;
+    /*0x06*/ s16 z;
+    /*0x08*/ u16 orientation;
+    /*0x0C*/ s32 unkC;
+    /*0x10*/ f32 scale;
+    /*0x14*/ f32 phase;
+    /*0x18*/ f32 phase_step;
+} smokeinstance_t;
 
-extern f32 globalxrepeat;
-extern f32 globalyrepeat;
-extern f32 globalxpanning;
-extern f32 globalypanning;
-extern f32 globalwallvoffset;
-extern f32 globaltiledimy;
-extern f32 globaltilescalex;
-extern f32 globaltilescaley;
-extern f32 globalwallu1;
-extern f32 globalwallu2;
-extern f32 globalwallv1;
-extern f32 globalwallv2;
-extern f32 globalwallv3;
-extern f32 globalwallv4;
+typedef struct
+{
+    u8 enable;
+    u16 time;
+    s16 startsize, step, stepdec;
+    u8 color1[3], color2[3];
+} explosioninfo_t;
+
+typedef struct
+{
+    /*0x00*/ s8 status;
+    /*0x01*/ u8 type;
+    /*0x02*/ u8 c_enable, r_enable;
+    /*0x04*/ s16 x, y, z;
+    /*0x0A*/ s16 c_size, r_size;
+    /*0x0E*/ u16 c_time, r_time;
+    /*0x12*/ s16 c_step, r_step;
+} explosioninstance_t;
+
+#define MAXEXPLOSIONS 16
+
 extern u16 D_8026EC00;
 extern s16 tilemap[MAXTILES];
 extern s32 D_800D9AEC;
 extern u8 D_8025F398[];
 extern char D_8025FEC0[];
-extern s32 D_8026EB40;
+extern s32 globalboardnum;
 extern u16 *D_8026EB94;
 extern u16 D_8026EB98;
 extern vertex_t wallvertex[12];
@@ -58,33 +71,47 @@ extern s32 D_8021E4CC;
 extern u16 D_8021D67E;
 extern s32 D_8021D700;
 extern s32 wallpolycount;
+extern f32 viewportscalex;
+extern f32 viewportscaley;
+extern f32 viewporttransx;
+extern f32 viewporttransy;
+extern f32 D_8025C380;
+extern u16 globalpicnum;
+extern smokeinstance_t smoke[MAXEXPLOSIONS];
+extern explosioninstance_t explosions[MAXEXPLOSIONS];
+extern s16 D_8021DCAC;
+extern s16 D_8021DCAE;
+extern s16 D_8021DCB0;
 
-extern mapinfo_t mapinfo[];
-extern f32 D_800DA490;
-extern f32 D_800DA494;
-extern f32 D_800DA498;
+extern u16 explosiontris[20][3];
+extern explosioninfo_t explosioninfo[9][2];
+extern boardinfo_t boardinfo[];
+extern f32 globalxpos;
+extern f32 globalypos;
+extern f32 globalzpos;
+extern s32 D_800DA730;
 
 u8 *loadtile(u16 tileid);
 u8 tilemasks(u16 tileid);
 u8 tilemaskt(u16 tileid);
-void func_80064A54(void);
+void resetexplosions(void);
 void func_80066DF4(s32 x1, s32 y1, s32 x2, s32 y2);
 void func_800637C8(void);
 
-void func_8005B5F0(int mapnum)
+void loadboard(int boardnum)
 {
     s32 size;
     resetmovesectorinfo();
     resetboardtimer();
-    D_8026EB40 = mapnum;
-    if (mapinfo[mapnum].numwalls)
+    globalboardnum = boardnum;
+    if (boardinfo[boardnum].numwalls)
     {
     }
-    size = mapinfo[mapnum].rom_end - mapinfo[mapnum].rom_start;
-    copyfromrom((char *)TEMP_AREA_ADDR, mapinfo[mapnum].rom_start, size);
-    numsectors = mapinfo[mapnum].numsectors;
-    numsprites = mapinfo[mapnum].numsprites;
-    numwalls = mapinfo[mapnum].numwalls;
+    size = boardinfo[boardnum].rom_end - boardinfo[boardnum].rom_start;
+    copyfromrom((char *)TEMP_AREA_ADDR, boardinfo[boardnum].rom_start, size);
+    numsectors = boardinfo[boardnum].numsectors;
+    numsprites = boardinfo[boardnum].numsprites;
+    numwalls = boardinfo[boardnum].numwalls;
     if (numsprites)
     {
         printf("SPRITES %d\n", numsprites);
@@ -99,16 +126,16 @@ void func_8005B5F0(int mapnum)
     }
     cameradist = 0;
     cameraclock = totalclock;
-    sky_re = mapinfo[mapnum].sky_re;
-    sky_r = mapinfo[mapnum].sky_r;
-    sky_ge = mapinfo[mapnum].sky_ge;
-    sky_g = mapinfo[mapnum].sky_g;
-    sky_be = mapinfo[mapnum].sky_be;
-    sky_b = mapinfo[mapnum].sky_b;
+    sky_re = boardinfo[boardnum].sky_re;
+    sky_r = boardinfo[boardnum].sky_r;
+    sky_ge = boardinfo[boardnum].sky_ge;
+    sky_g = boardinfo[boardnum].sky_g;
+    sky_be = boardinfo[boardnum].sky_be;
+    sky_b = boardinfo[boardnum].sky_b;
     func_800B4C80();
     clearbufbyte(Sound, 0, sizeof(Sound));
     clearbufbyte(SoundOwner, 0, sizeof(SoundOwner));
-    func_80064A54();
+    resetexplosions();
 }
 
 /*TODO*/
@@ -145,19 +172,19 @@ void func_8005B728(void)
     s32 count, i;
     void *sector_addr;
 
-    D_800DA490 = mapinfo[D_8026EB40].xpos;
-    D_800DA494 = mapinfo[D_8026EB40].ypos;
-    D_800DA498 = mapinfo[D_8026EB40].zpos;
-    ps->posx = (D_800DA490 * 2);
-    ps->posy = (D_800DA494 * 2);
-    ps->posz = (D_800DA498 * 32);
-    ps->ang = mapinfo[D_8026EB40].ang;
+    globalxpos = boardinfo[globalboardnum].xpos;
+    globalypos = boardinfo[globalboardnum].ypos;
+    globalzpos = boardinfo[globalboardnum].zpos;
+    ps->posx = (globalxpos * 2);
+    ps->posy = (globalypos * 2);
+    ps->posz = (globalzpos * 32);
+    ps->ang = boardinfo[globalboardnum].ang;
     ps->cursectnum = 4;
     ps->over_shoulder_on = 0;
-    sector_addr = mapinfo[D_8026EB40].sector_addr;
+    sector_addr = boardinfo[globalboardnum].sector_addr;
     RNCDecompress(sector_addr, (char *)sector);
-    RNCDecompress(mapinfo[D_8026EB40].wall_addr, (char *)wall);
-    RNCDecompress(mapinfo[D_8026EB40].sprite_addr, (char *)sprite);
+    RNCDecompress(boardinfo[globalboardnum].wall_addr, (char *)wall);
+    RNCDecompress(boardinfo[globalboardnum].sprite_addr, (char *)sprite);
     RNCDecompress((char *)TEMP_AREA_ADDR, (char *)VERTEXBASE);
     count = 0;
     for (i = 0; i < numsectors; i++)
@@ -184,11 +211,76 @@ void func_8005B934(void)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/display_game.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005BB48.s")
+void func_8005BB48(void)
+{
+    viewport[0].vp.vtrans[0] = SCREEN_WIDTH * 2;
+    viewport[0].vp.vtrans[1] = SCREEN_HEIGHT * 2;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005BB64.s")
+void func_8005BB64(Vp *vp)
+{
+    viewportscalex = (vp->vp.vscale[0] / 4);
+    viewportscaley = (vp->vp.vscale[1] / 4);
+    viewporttransx = (vp->vp.vtrans[0] / 4);
+    viewporttransy = (vp->vp.vtrans[1] / 4);
+    if (numplayers < 3)
+        D_8025C380 = 1.0f;
+    else
+        D_8025C380 = 0.75f;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005BC30.s")
+void func_8005BC30(u8 arg0)
+{
+    switch (numplayers)
+    {
+    case 1:
+        gSPViewport(pkt++, &viewport[7]);
+        gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 22, 16, 298, 224);
+        func_8005BB64(&viewport[7]);
+        break;
+    case 2:
+        switch (arg0)
+        {
+        case 0:
+            gSPViewport(pkt++, &viewport[5]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 22, 16, 298, 119);
+            func_8005BB64(&viewport[5]);
+            break;
+        case 1:
+            gSPViewport(pkt++, &viewport[6]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 22, 121, 298, 224);
+            func_8005BB64(&viewport[6]);
+            break;
+        }
+        break;
+    case 3:
+    case 4:
+        switch (arg0)
+        {
+        case 0:
+            gSPViewport(pkt++, &viewport[1]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 22, 16, 159, 119);
+            func_8005BB64(&viewport[1]);
+            break;
+        case 1:
+            gSPViewport(pkt++, &viewport[2]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 161, 16, 298, 119);
+            func_8005BB64(&viewport[2]);
+            break;
+        case 2:
+            gSPViewport(pkt++, &viewport[3]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 22, 121, 159, 224);
+            func_8005BB64(&viewport[3]);
+            break;
+        case 3:
+            gSPViewport(pkt++, &viewport[4]);
+            gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 161, 121, 298, 224);
+            func_8005BB64(&viewport[4]);
+            break;
+        }
+        break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005BF2C.s")
 
@@ -205,7 +297,32 @@ void clearscreen(void)
     gDPSetTexturePersp(pkt++, G_TP_NONE);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005C390.s")
+void func_8005C390(s32 arg0)
+{
+    for (; arg0 >= 11; arg0 -= 11)
+        ;
+    for (; arg0 < 0; arg0 += 11)
+        ;
+    switch (arg0)
+    {
+    case 0:
+        gDPSetRenderMode(pkt++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+        break;
+    case 1:
+        gDPSetRenderMode(pkt++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+        break;
+    case 2:
+        gDPSetRenderMode(pkt++, G_RM_ZB_OPA_DECAL, G_RM_ZB_OPA_DECAL2);
+        break;
+    case 3:
+        gDPSetRenderMode(pkt++, G_RM_ZB_XLU_DECAL, G_RM_ZB_XLU_DECAL2);
+        break;
+    case 8:
+        gDPSetRenderMode(pkt++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+    default:
+        break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8005C4D4.s")
 
@@ -229,7 +346,7 @@ void clearscreen(void)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80061904.s")
 
-void func_80061CB8(s16 tilenum)
+void settexture(s16 tilenum)
 {
     u16 _tilenum = tilenum;
 
@@ -241,7 +358,7 @@ void func_80061CB8(s16 tilenum)
         tilenum += animateoffs(_tilenum, 0);
 
     gDPLoadTextureBlock_4b(pkt++, loadtile(tilenum) + 32, G_IM_FMT_I,
-                           tileinfo[tilenum].dim1, tileinfo[tilenum].dim2, 0, 0, 0,
+                           tileinfo[tilenum].dimx, tileinfo[tilenum].dimy, 0, 0, 0,
                            tilemasks(tilenum), tilemaskt(tilenum), 0, 0);
 
     D_8021D67E = _tilenum;
@@ -254,7 +371,7 @@ void func_80061FC8(s16 tileid)
     {
         gDPLoadTLUT_pal16(pkt++, 0, loadtile(tileid));
         gDPLoadTextureBlock_4b(pkt++, loadtile(tileid) + 32, G_IM_FMT_CI,
-                               tileinfo[tileid].dim1, tileinfo[tileid].dim2, 0,
+                               tileinfo[tileid].dimx, tileinfo[tileid].dimy, 0,
                                G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
                                0, 0, 0, 0);
         D_8021E4CC++;
@@ -262,13 +379,21 @@ void func_80061FC8(s16 tileid)
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_800622E0.s")
+void func_800622E0(void)
+{
+    D_8021E4CC = 0;
+    D_8021DCAC = 0;
+    D_8021DCAE = 0;
+    D_8021DCB0 = 0;
+}
 
 void func_80062304(void)
 {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8006230C.s")
+void func_8006230C(s32 arg0)
+{
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80062314.s")
 
@@ -284,7 +409,10 @@ void func_80062304(void)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80063168.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80063270.s")
+void func_80063270(void)
+{
+    drawrooms_(globalposx, globalposy, globalposz, -globalang, globalsectnum);
+}
 
 void func_800632BC(s32, s32);
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_800632BC.s")
@@ -316,9 +444,24 @@ u16 gettileid(u16 tilenum)
         return tileid;
 }
 
+void func_80063750(void);
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80063750.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_800637C8.s")
+void func_800637C8(void)
+{
+    s32 i;
+
+    func_80063750();
+    for (i = 0; i < 2851; i++)
+    {
+        tileinfo[i].ramaddr = NULL;
+        D_8025F398[i] = 0;
+    }
+
+    D_800DA730 = 0;
+    if (globalboardnum == 27)
+        func_80056150();
+}
 
 u8 *loadtile(u16 tileid)
 {
@@ -335,11 +478,11 @@ u8 *loadtile(u16 tileid)
     }
     if ((tileinfo[tileid].flags & 0x80) == 0x80)
     {
-        size = (tileinfo[tileid].dim1 * tileinfo[tileid].dim2);
+        size = (tileinfo[tileid].dimx * tileinfo[tileid].dimy);
     }
     else
     {
-        size = (((tileinfo[tileid].dim1 * tileinfo[tileid].dim2) / 2) + 0x20);
+        size = (((tileinfo[tileid].dimx * tileinfo[tileid].dimy) / 2) + 0x20);
     }
 
     if (size < 0)
@@ -371,7 +514,7 @@ u8 *loadtile(u16 tileid)
 
 u8 tilemasks(u16 tileid)
 {
-    switch (tileinfo[tileid].dim1)
+    switch (tileinfo[tileid].dimx)
     {
     case 1:
         return 0;
@@ -397,7 +540,7 @@ u8 tilemasks(u16 tileid)
 
 u8 tilemaskt(u16 tileid)
 {
-    switch (tileinfo[tileid].dim2)
+    switch (tileinfo[tileid].dimy)
     {
     case 1:
         return 0;
@@ -425,11 +568,10 @@ u8 tilemaskt(u16 tileid)
 
 void gametext(s16 x, s16 y, char *string)
 {
-    s32 x_, y_;
+    s32 x_;
     char *ptr;
 
     x_ = x;
-    y_ = y;
 
     if (x_ == -1)
     {
@@ -445,7 +587,7 @@ void gametext(s16 x, s16 y, char *string)
 
     for (; ((*string != 0) && (*string != '\n') && (*string != '\r')); string++)
     {
-        rotatesprite_simple(x_, y_, *string + (2822 - '!'));
+        rotatesprite_simple(x_, y, *string + (2822 - '!'));
         if (*string == ' ')
             x_ += 7;
         else
@@ -453,39 +595,377 @@ void gametext(s16 x, s16 y, char *string)
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/menutext.s")
+void menutext(s16 x, s16 y, char *string)
+{
+    s32 x_;
+    char *ptr;
+    s16 tilenum;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80064418.s")
+    x_ = x;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80064644.s")
+    if (x_ == -1)
+    {
+        for (ptr = string, x = 0; ((*ptr != 0) && (*ptr != '\n') && (*ptr != '\r')); ptr++)
+        {
+            tilenum = *ptr;
+            if (tilenum >= '0' && tilenum <= '9')
+                tilenum += 2882;
+            if (tilenum >= 'A' && tilenum <= 'Z')
+                tilenum += 2875;
+            if (tilenum == '-')
+                tilenum = 2929;
+            if (tilenum == '.')
+                tilenum = 3002;
+            if (tilenum == ',')
+                tilenum = 3003;
+            if (tilenum == '\'')
+                tilenum = 3022;
+            if (tilenum == ' ')
+                x += 12;
+            else
+                x += tileinfo[gettileid(tilenum)].tilesizx;
+        }
+        x_ = (SCREEN_WIDTH / 2) - x / 2;
+    }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80064674.s")
+    for (; ((*string != 0) && (*string != '\n') && (*string != '\r')); string++)
+    {
+        tilenum = *string;
+        if (tilenum >= '0' && tilenum <= '9')
+            tilenum += 2882;
+        if (tilenum >= 'A' && tilenum <= 'Z')
+            tilenum += 2875;
+        if (tilenum == '-')
+            tilenum = 2929;
+        if (tilenum == '.')
+            tilenum = 3002;
+        if (tilenum == ',')
+            tilenum = 3003;
+        if (tilenum == '\'')
+            tilenum = 3022;
+        if (tilenum == ' ')
+            x_ += 12;
+        else
+        {
+            rotatesprite_simple(x_, y, tilenum);
+            x_ += tileinfo[gettileid(tilenum)].tilesizx;
+        }
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/display_tileviewer.s")
+void func_80064418(s16 x, s16 y, char *string)
+{
+    s32 x_;
+    char *ptr;
+    s16 tilenum;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/cacheandtileinit.s")
+    x_ = x;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/addexplosionmodel2.s")
+    if (x_ == -1)
+    {
+        for (ptr = string, x = 0; ((*ptr != 0) && (*ptr != '\n') && (*ptr != '\r')); ptr++)
+        {
+            tilenum = *ptr;
+            if (tilenum >= '0' && tilenum <= '9')
+                tilenum += 2944;
+            if (tilenum >= 'A' && tilenum <= 'Z')
+                tilenum += 2901;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/addexplosionmodel.s")
+            x += tileinfo[gettileid(tilenum)].tilesizx;
+        }
+        x_ = (SCREEN_WIDTH / 2) - x / 2;
+    }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80064A54.s")
+    for (; ((*string != 0) && (*string != '\n') && (*string != '\r')); string++)
+    {
+        tilenum = *string;
+        if (tilenum >= '0' && tilenum <= '9')
+            tilenum += 2944;
+        if (tilenum >= 'A' && tilenum <= 'Z')
+            tilenum += 2901;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80064AA4.s")
+        rotatesprite_simple(x_, y, tilenum);
+        x_ += tileinfo[gettileid(tilenum)].tilesizx;
+    }
+}
+
+void func_80064644(void)
+{
+    s32 i, j;
+
+    for (i = 0; i != SCREEN_HEIGHT; i++)
+    {
+        for (j = 0; j != SCREEN_WIDTH; j++)
+            ;
+    }
+}
+
+void func_80064674(void)
+{
+    initcache((s32)VERTEXBASE, (s32)ZBUFFER_ADDR - (s32)VERTEXBASE);
+    func_800637C8();
+}
+
+void display_tileviewer(void)
+{
+    char buffer[260];
+
+    gDPPipeSync(pkt++);
+    guTranslate(&viewinfo->_f_300, 0.0f, 0.0f, 0.0f);
+    guScale(&viewinfo->_f_380, 0.5f, 0.5f, 0.5f);
+
+    gSPMatrix(pkt++, OS_K0_TO_PHYSICAL(&viewinfo->_f_300), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(pkt++, OS_K0_TO_PHYSICAL(&viewinfo->_f_380), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+
+    gSPDisplayList(pkt++, &dl_2);
+    clearscreen();
+
+    gDPSetScissor(pkt++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    sprintf(buffer, "picnum %d\n", globalpicnum);
+    gametext(20, 20, buffer);
+    rotatesprite_simplest(160, 220, globalpicnum);
+    if (control_button[0] & CONT_LEFT)
+        globalpicnum--;
+
+    if (control_button[0] & CONT_RIGHT)
+        globalpicnum++;
+}
+
+void cacheandtileinit(void)
+{
+    initcache((s32)VERTEXBASE, (s32)ZBUFFER_ADDR - (s32)VERTEXBASE);
+    func_800637C8();
+}
+
+void addsmoke(short x, short y, short z, short type)
+{
+    s16 i;
+
+    if (numplayers != 1)
+        return;
+
+    for (i = 0; i < MAXEXPLOSIONS; i++)
+    {
+        if (smoke[i].status == 0)
+            goto label;
+    }
+    return;
+
+label:
+    smoke[i].type = type;
+    smoke[i].z = z;
+    smoke[i].scale = 40.0f;
+    smoke[i].x = x;
+    smoke[i].y = y;
+    smoke[i].phase = 10.0f;
+    smoke[i].phase_step = 0.1f;
+    smoke[i].orientation = krand2();
+    smoke[i].status = 1;
+}
+
+void addexplosionmodel(short x, short y, short z, char type)
+{
+    s16 i;
+
+    if (numplayers != 1)
+        return;
+
+    for (i = 0; i < MAXEXPLOSIONS; i++)
+    {
+        if (explosions[i].status == 0)
+            goto label;
+    }
+    return;
+
+label:
+    explosions[i].type = type;
+    explosions[i].x = x;
+    explosions[i].y = y;
+    explosions[i].z = z;
+    explosions[i].status = 1;
+    explosions[i].c_size = explosioninfo[type][0].startsize;
+    explosions[i].r_size = explosioninfo[type][1].startsize;
+    explosions[i].c_time = explosioninfo[type][0].time;
+    explosions[i].r_time = explosioninfo[type][1].time;
+    explosions[i].c_step = explosioninfo[type][0].step;
+    explosions[i].r_step = explosioninfo[type][1].step;
+    explosions[i].c_enable = explosioninfo[type][0].enable;
+    explosions[i].r_enable = explosioninfo[type][1].enable;
+}
+
+void resetexplosions(void)
+{
+    s32 i;
+    for (i = 0; i < 16; i++)
+        smoke[i].status = 0;
+
+    for (i = 0; i < 16; i++)
+        explosions[i].status = 0;
+}
+
+void displayexplosion(s16 index, u8 bottom)
+{
+    u16 i, type;
+
+    type = explosions[index].type;
+    if (explosions[index].c_enable == 1)
+    {
+        settexture(3921);
+        gDPSetPrimColor(pkt++, 0, 0, explosioninfo[type][0].color1[0],
+                        explosioninfo[type][0].color1[1], explosioninfo[type][0].color1[2], 0xFF);
+        gDPSetEnvColor(pkt++, explosioninfo[type][0].color2[0],
+                       explosioninfo[type][0].color2[1], explosioninfo[type][0].color2[2], 0xFF);
+
+        for (i = 0; i < 20; i++)
+            gSP1Triangle(pkt++, explosiontris[i][0], explosiontris[i][1], explosiontris[i][2], 0);
+    }
+    if ((explosions[index].r_enable == 1) && (bottom == 0))
+    {
+        settexture(3674);
+        gDPSetPrimColor(pkt++, 0, 0, explosioninfo[type][1].color1[0],
+                        explosioninfo[type][1].color1[1], explosioninfo[type][1].color1[2], 0xFF);
+        gDPSetEnvColor(pkt++, explosioninfo[type][1].color2[0],
+                       explosioninfo[type][1].color2[1], explosioninfo[type][1].color2[2], 0xFF);
+        gSP1Triangle(pkt++, 12, 13, 14, 12);
+        gSP1Triangle(pkt++, 12, 14, 15, 12);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80064D28.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_800651C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80065458.s")
+void displayexplosions(void)
+{
+    f32 x, y, z;
+    f32 sx, sy, sz, sw;
+    f32 tempx, tempy;
+    f32 scale;
+    s32 alpha;
+    s16 i;
+
+    gSPClearGeometryMode(pkt++, G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
+                                    G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH);
+    gSPSetGeometryMode(pkt++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetRenderMode(pkt++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+    gDPSetColorDither(pkt++, G_CD_NOISE);
+    gDPSetAlphaCompare(pkt++, G_AC_NONE);
+    gDPSetTextureLUT(pkt++, G_TT_NONE);
+    gDPSetCombineMode(pkt++, G_CC_BLENDPE, G_CC_BLENDPE);
+    gDPSetDepthSource(pkt++, G_ZS_PRIM);
+    gDPSetTexturePersp(pkt++, G_TP_NONE);
+    D_8026EC31 = 0;
+    gDPSetCombineMode(pkt++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPSetPrimColor(pkt++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    setfxcolor(0xFF, 0xFF, 0xFF, 0, 0, 0);
+    gDPSetColorDither(pkt++, G_CD_NOISE);
+    gDPSetAlphaDither(pkt++, G_AD_NOISE);
+
+    for (i = 0; i < 16; i++)
+    {
+        if (smoke[i].status == 0)
+            continue;
+
+        x = (smoke[i].x / 2);
+        y = (smoke[i].y / 2);
+        z = (smoke[i].z / 2);
+        sx = ((projmatrix[0][0] * x) + (projmatrix[1][0] * y) + (projmatrix[2][0] * z) + projmatrix[3][0]);
+        tempy = sy / sw; // FAKE
+        sy = ((projmatrix[0][1] * x) + (projmatrix[1][1] * y) + (projmatrix[2][1] * z) + projmatrix[3][1]);
+        sz = ((projmatrix[0][2] * x) + (projmatrix[1][2] * y) + (projmatrix[2][2] * z) + projmatrix[3][2]);
+        sw = ((projmatrix[0][3] * x) + (projmatrix[1][3] * y) + (projmatrix[2][3] * z) + projmatrix[3][3]);
+        if (sw == 0.0f)
+            continue;
+
+        tempx = sx / sw;
+        if (tempx < -2.0f)
+            continue;
+
+        tempy = sy / sw;
+        if ((tempy < -2.0f) || (tempx > 2.0f) || (tempy > 2.0f))
+            continue;
+
+        if (((sz / sw) < 0.0f) || ((sz / sw) > 1.0f))
+            continue;
+
+        gDPSetPrimDepth(pkt++, ((((sz / sw) * 511.0f) + 511.0f) * 32.0f), 0);
+
+        sz = 1.0f - (sz / sw);
+        scale = smoke[i].scale;
+        alpha = (smoke[i].phase * 25.0f);
+        if (smoke[i].type == 0)
+        {
+            gDPSetPrimColor(pkt++, 0, 0, 200, 200, 200, alpha);
+            gDPSetEnvColor(pkt++, 0, 0, 0, alpha);
+        }
+        else
+        {
+            gDPSetPrimColor(pkt++, 0, 0, 0, 0, 0, alpha);
+            gDPSetEnvColor(pkt++, 0, 0, 0, alpha);
+        }
+
+        rendertileworld((tempx * viewportscalex) + viewporttransx,
+                        (-tempy * viewportscaley) + viewporttransy,
+                        scale * sz * 4.0f, scale * sz * 4.0f,
+                        gettileid(3658), smoke[i].orientation);
+    }
+    clearscreen();
+    gDPSetDepthSource(pkt++, G_ZS_PIXEL);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/rotatesprite_simple.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80066170.s")
+void animateexplosions(void)
+{
+    s16 i;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80066250.s")
+    for (i = 0; i < MAXEXPLOSIONS; i++)
+    {
+        if (explosions[i].status != 0)
+        {
+            explosions[i].r_size += explosions[i].r_step;
+            explosions[i].c_size += explosions[i].c_step;
+            explosions[i].r_step -= explosioninfo[explosions[i].type][1].stepdec;
+            explosions[i].c_step -= explosioninfo[explosions[i].type][0].stepdec;
+            explosions[i].c_time--;
+            explosions[i].r_time--;
+            if (explosions[i].c_time == 0)
+                explosions[i].c_enable = 0;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/animatemodels.s")
+            if (explosions[i].r_time == 0)
+                explosions[i].r_enable = 0;
+
+            if ((explosions[i].c_enable + explosions[i].r_enable) == 0)
+                explosions[i].status = 0;
+        }
+    }
+}
+
+void animatesmoke(void)
+{
+    s16 i;
+
+    for (i = 0; i < MAXEXPLOSIONS; i++)
+    {
+        if (smoke[i].status != 0)
+        {
+            smoke[i].scale += smoke[i].phase;
+            smoke[i].phase -= smoke[i].phase_step;
+            smoke[i].z -= smoke[i].phase;
+            if (smoke[i].phase <= 0.0f)
+                smoke[i].status = 0;
+        }
+    }
+}
+
+void animatemodels(void)
+{
+    if (globalboardnum == 27)
+        animateboss2();
+
+    animateexplosions();
+    animatesmoke();
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80066324.s")
 
@@ -500,9 +980,9 @@ void func_80066BE0(s32 arg0)
     s32 x1, y1, x2, y2;
 
     if (arg0 != 0)
-        D_8026EB94 = (u16 *)0x80000400;
+        D_8026EB94 = (*FRAMEBUFFER_ADDR)[0];
     else
-        D_8026EB94 = (u16 *)0x80025C00;
+        D_8026EB94 = (*FRAMEBUFFER_ADDR)[1];
 
     for (i = 0; i < drawwallcnt; i++)
     {
@@ -546,243 +1026,3 @@ void func_800674EC(s32 x, s32 y, s32 arg2)
         D_8026EB94[x + y * SCREEN_WIDTH] = D_8026EB98;
     }
 }
-
-void settileglobals(u16 tilenum);
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/settileglobals.s")
-
-void setwallglobals(u16 wallnum, s16 cstat)
-{
-    globalxrepeat = wall[wallnum].xrepeat / globaltilescalex;
-    globalxpanning = wall[wallnum].xpanning / globaltilescalex;
-    globalyrepeat = (wall[wallnum].yrepeat / globaltilescaley) / 4;
-
-    if (cstat & 256)
-    {
-        globalypanning = (255 - wall[wallnum].ypanning);
-        globalypanning = (globaltiledimy / 256) * globalypanning;
-    }
-    else
-    {
-        globalypanning = (wall[wallnum].ypanning);
-        globalypanning = (globaltiledimy / 256) * globalypanning;
-        globalyrepeat = -globalyrepeat;
-    }
-
-    globalwallvoffset = globalypanning;
-
-    if ((cstat & 4) == 4)
-        globalwallvoffset = (globaltiledimy * 32.0f) + (globalypanning * 32.0f);
-    else
-        globalwallvoffset = globalypanning * 32.0f;
-
-    globalwallu1 = globalxpanning * 32.0f;
-    globalwallu2 = (globalxrepeat * 8.0f * 32.0f) + globalxpanning * 32.0f;
-}
-
-void setwallglobals2(u16 wallnum, s16 cstat)
-{
-    globalxrepeat = wall[wallnum].xrepeat / globaltilescalex;
-    globalxpanning = wall[wall[wallnum].nextwall].xpanning / globaltilescalex;
-    globalyrepeat = (wall[wallnum].yrepeat / globaltilescaley) / 4;
-
-    if ((cstat & 0x100) == 0x100)
-    {
-        globalypanning = (0xFF - wall[wall[wallnum].nextwall].ypanning);
-        globalypanning = (globaltiledimy / 256) * globalypanning;
-    }
-    else
-    {
-        globalypanning = wall[wall[wallnum].nextwall].ypanning;
-        globalypanning = (globaltiledimy / 256) * globalypanning;
-        globalyrepeat = -globalyrepeat;
-    }
-
-    globalwallvoffset = globalypanning;
-
-    if ((cstat & 4) == 4)
-        globalwallvoffset = (globaltiledimy * 32.0f) + (globalypanning * 32.0f);
-    else
-        globalwallvoffset = globalypanning * 32.0f;
-
-    globalwallu1 = globalxpanning * 32.0f;
-    globalwallu2 = (globalxrepeat * 8.0f * 32.0f) + globalxpanning * 32.0f;
-}
-
-void handlewallcstatslope(s16 cstat)
-{
-    f32 f1, prev;
-    s32 adjust;
-
-    if ((cstat & 8) == 8)
-    {
-        prev = globalwallu1;
-        globalwallu1 = globalwallu2;
-        globalwallu2 = prev;
-    }
-    f1 = MIN(globalwallv1, MIN(globalwallv2, MIN(globalwallv3, globalwallv4)));
-    if (f1 < -32760.0f)
-    {
-        adjust = f1 - (-32760.0f);
-        adjust = ((adjust + 0xFFF) & ~0xFFF);
-        globalwallv1 += adjust;
-        globalwallv2 += adjust;
-        globalwallv3 += adjust;
-        globalwallv4 += adjust;
-    }
-    f1 = MAX(globalwallv1, MAX(globalwallv2, MAX(globalwallv3, globalwallv4)));
-    if (f1 > 32760.0f)
-    {
-        adjust = f1 - 32760.0f;
-        adjust = ((adjust + 0xFFF) & ~0xFFF);
-        globalwallv1 -= adjust;
-        globalwallv2 -= adjust;
-        globalwallv3 -= adjust;
-        globalwallv4 -= adjust;
-    }
-}
-
-void handlewallcstat(s16 cstat)
-{
-    f32 f1, prev;
-    s32 adjust;
-
-    if ((cstat & 8) == 8)
-    {
-        prev = globalwallu1;
-        globalwallu1 = globalwallu2;
-        globalwallu2 = prev;
-    }
-    f1 = min(globalwallv1, globalwallv2);
-    if (f1 < -32760.0f)
-    {
-        adjust = klabs2(f1) - 32760.0f;
-        adjust = ((adjust + 0xFFF) & ~0xFFF);
-        globalwallv1 += adjust;
-        globalwallv2 += adjust;
-        globalwallv3 += adjust;
-        globalwallv4 += adjust;
-    }
-    f1 = max(globalwallv1, globalwallv2);
-    if (f1 > 32760.0f)
-    {
-        adjust = f1 - 32760.0f;
-        adjust = ((adjust + 0xFFF) & ~0xFFF);
-        globalwallv1 -= adjust;
-        globalwallv2 -= adjust;
-        globalwallv3 -= adjust;
-        globalwallv4 -= adjust;
-    }
-}
-
-void wallcalc(s32 sectnum, s32 wallnum)
-{
-    s16 nextsector;
-    s16 cstat;
-
-    nextsector = wall[wallnum].nextsector;
-    cstat = sector[sectnum].floorstat;
-    cstat |= sector[sectnum].ceilingstat;
-    if (nextsector != -1)
-    {
-        cstat |= sector[nextsector].floorstat;
-        cstat |= sector[nextsector].ceilingstat;
-    }
-
-    if (cstat & 2)
-        wallcalcslope(sectnum, wallnum);
-    else
-        wallcalcnoslope(sectnum, wallnum);
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/wallcalcslope.s")
-
-s32 drawmaskwall(u16 wallnum)
-{
-    s32 x1, x2;
-    s32 y1, y2;
-    s32 ceilz1, floorz1;
-    s32 floorz2, ceilz2;
-    s32 z1, z2, z3;
-    s16 cstat;
-    u16 i;
-    s32 ret;
-
-    ret = 0;
-    i = 0;
-    wallpolycount = 0;
-
-    x1 = wall[wallnum].x;
-    y1 = wall[wallnum].y;
-    x2 = wall[wall[wallnum].point2].x;
-    y2 = wall[wall[wallnum].point2].y;
-    ceilz1 = getceilzofslope(wall[wallnum].sectnum, x1, y1) >> 4;
-    ceilz2 = getceilzofslope(wall[wallnum].sectnum, x2, y2) >> 4;
-    z1 = getceilzofslope(wall[wallnum].nextsector, x1, y1) >> 4;
-    z2 = getceilzofslope(wall[wallnum].nextsector, x2, y2) >> 4;
-
-    if (ceilz1 < z1)
-    {
-        ceilz1 = z1;
-        ceilz2 = z2;
-    }
-
-    floorz1 = getflorzofslope(wall[wallnum].sectnum, x1, y1) >> 4;
-    floorz2 = getflorzofslope(wall[wallnum].sectnum, x2, y2) >> 4;
-    z1 = getflorzofslope(wall[wallnum].nextsector, x1, y1) >> 4;
-    z2 = getflorzofslope(wall[wallnum].nextsector, x2, y2) >> 4;
-
-    if (z1 < floorz1)
-    {
-        floorz1 = z1;
-        floorz2 = z2;
-    }
-
-    if ((wall[wallnum].cstat & 4) != 4)
-    {
-        z3 = MAX((sector[wall[wallnum].sectnum].ceilingz >> 4),
-                 (sector[wall[wallnum].nextsector].ceilingz >> 4));
-        cstat = wall[wallnum].cstat & ~4;
-    }
-    else
-    {
-        z3 = MIN((sector[wall[wallnum].sectnum].floorz >> 4),
-                 (sector[wall[wallnum].nextsector].floorz >> 4));
-        cstat = wall[wallnum].cstat & ~4;
-    }
-
-    settileglobals(wall[wallnum].overpicnum);
-    setwallglobals(wallnum, cstat);
-
-    globalwallv1 = ((z3 - ceilz1) * globalyrepeat) + globalwallvoffset;
-    globalwallv2 = ((z3 - floorz1) * globalyrepeat) + globalwallvoffset;
-    globalwallv3 = ((z3 - floorz2) * globalyrepeat) + globalwallvoffset;
-    globalwallv4 = ((z3 - ceilz2) * globalyrepeat) + globalwallvoffset;
-    handlewallcstatslope(cstat);
-
-    WALL_VERTEX(x1, y1, ceilz1, globalwallu1, globalwallv1)
-    WALL_VERTEX(x1, y1, floorz1, globalwallu1, globalwallv2)
-    WALL_VERTEX(x2, y2, floorz2, globalwallu2, globalwallv3)
-    WALL_VERTEX(x2, y2, ceilz2, globalwallu2, globalwallv4)
-
-    ret |= 4;
-    wallpolycount++;
-    return ret;
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/wallcalcnoslope.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8006A310.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8006A62C.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8006ADA4.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8006C2FC.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_8006CB30.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/rendertileworld.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/setfxcolor.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/unsetfxsprite.s")

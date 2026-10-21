@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     api_base = os.environ.get("DECOMPME_API_BASE", "https://decomp.me")
 
-    path = list(Path('asm/nonmatchings/').rglob(args.c_file + '*'))
+    path = list(Path('asm/nonmatchings/').rglob(args.c_file + '.s'))
     
     if len(path) == 0:
         print('Cannot find function ' + args.c_file)

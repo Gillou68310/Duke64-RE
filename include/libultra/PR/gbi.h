@@ -1889,7 +1889,7 @@ typedef union {
  * Note: the SP1Triangle() and line macros multiply the vertex indices
  * by 10, this is an optimization for the microcode.
  */
-#if	(defined(F3DLP_GBI)||defined(F3DEX_GBI))
+#if	0//(defined(F3DLP_GBI)||defined(F3DEX_GBI))
 #  define __gsSP1Triangle_w1(v0, v1, v2)			\
      (_SHIFTL((v0)*2,16,8)|_SHIFTL((v1)*2,8,8)|_SHIFTL((v2)*2,0,8))
 #  define __gsSP1Triangle_w1f(v0, v1, v2, flag)			\

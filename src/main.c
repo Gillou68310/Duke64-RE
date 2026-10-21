@@ -2,17 +2,6 @@
 #include "sched.h"
 #include "duke3d.h"
 
-typedef struct {
-	char _f_[16];
-} polygondata_t;
-
-typedef struct {
-	char _f_0[0x480];
-	char _f_480[0x180];
-	polygondata_t f_600[10240];
-	Gfx f_28600[20480];
-} gfxpool_t;
-
 float sky_re = 0.f;
 float sky_r = 0.f;
 float sky_ge = 0.f;
@@ -68,19 +57,12 @@ char D_801C4430[16]; // unused?
 char D_801C4440[SP_DRAM_STACK_SIZE8];
 char D_801C4840[19120]; // fixme
 
-extern u16 framebuffer[2][SCREEN_WIDTH*SCREEN_HEIGHT];
-extern u16 zbuffer[SCREEN_WIDTH*SCREEN_HEIGHT];
-
 extern short D_801012C8;
 extern short D_801012CC;
 extern char D_801CB922;
 extern short D_801012D0;
 
 extern int totalclocklock;
-
-extern char dl_0[];
-extern char dl_1[];
-
 extern char palettes[];
 
 extern char static_ROM_START[];
@@ -123,7 +105,7 @@ extern signed char doinitrumble;
 
 void boot(void)
 {
-	// fixme
+	/*TODO*/
 	"FRAME TIME %d\n";
 	"0x%X (0x%X)\n";
 	"Code size left = %dk\n";

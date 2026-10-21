@@ -39,9 +39,12 @@ Prepared for public release: 03/21/2003 - Charlie Wiederhold, 3D Realms
 #define printf
 #define exit(A) while(1)
 
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
+#define SCREEN_WIDTH (320)
+#define SCREEN_HEIGHT (240)
 
+typedef u16 framebuffer_t[2][SCREEN_WIDTH*SCREEN_HEIGHT];
+
+#define FRAMEBUFFER_ADDR ((framebuffer_t*)0x80000400)
 #define VERTEXBASE ((vertex_t*)0x802C5000)
 #define TEMP_AREA_ADDR (0x8035A800)
 #define ZBUFFER_ADDR (0x803DA800)
@@ -511,7 +514,7 @@ extern int globalhoriz;
 extern int globalposx;
 extern int globalposy;
 extern int globalposz;
-extern short globalsectnum;
+extern u16 globalsectnum;
 
 extern float sky_re;
 extern float sky_r;
@@ -520,11 +523,37 @@ extern float sky_g;
 extern float sky_be;
 extern float sky_b;
 
+extern s32 wallpolycount;
 extern s32 drawceilcnt;
 extern s32 drawfloorcnt;
 extern s32 drawwallcnt;
 extern u16 drawwalllist[256];
-
+extern vertex_t wallvertex[12];
+extern float projmatrix[4][4];
 extern u8 D_80101364;
+extern s8 D_8026EC31;
+extern Vp viewport[];
+extern framebuffer_t framebuffer;
+extern u16 zbuffer[SCREEN_WIDTH*SCREEN_HEIGHT];
+
+typedef struct {
+    char _f_[16];
+} polygondata_t;
+
+typedef struct {
+    char _f_0[0x300];
+    Mtx _f_300;
+    Mtx _f_340;
+    Mtx _f_380;
+    char _f_3C0[0xC0];
+    char _f_480[0x180];
+    polygondata_t f_600[10240];
+    Gfx f_28600[20480];
+} gfxpool_t;
+
+extern gfxpool_t *viewinfo;
+extern Gfx dl_0[];
+extern Gfx dl_1[];
+extern Gfx dl_2[];
 
 #include "funct.h"

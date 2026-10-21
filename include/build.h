@@ -124,8 +124,8 @@ typedef struct
 	short tilesizx;
 	short tilesizy;
 	unsigned short memsiz;
-	unsigned short dim1;
-	unsigned short dim2;
+	unsigned short dimx;
+	unsigned short dimy;
 	unsigned char flags;
 	unsigned short tile;
 } tileinfo_t;
@@ -256,13 +256,12 @@ int gettilesizy(unsigned short picnum);
 int getpicanm(unsigned short picnum);
 unsigned short gettileid(unsigned short picnum);
 
-void adjustceilingpanning(unsigned short, short, short);
-void adjustfloorpanning(unsigned short, short, short);
+void adjustceilingpanning(unsigned short sectnum, short x, short y);
+void adjustfloorpanning(unsigned short sectnum, short x, short y);
 
-
-void ms_update(unsigned short, unsigned short, int, int);
-void addexplosionmodel(short, short, short, char);
-void addexplosionmodel2(short, short, short, char);
+void ms_update(unsigned short sectnum, unsigned short ang, int x, int y);
+void addexplosionmodel(short x, short y, short z, char type);
+void addsmoke(short x, short y, short z, short type);
 
 float getanglef(float, float);
 

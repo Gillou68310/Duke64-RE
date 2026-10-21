@@ -749,7 +749,7 @@ void enterlevel(char g)
         menu_levelnum = levelnum;
     }
     
-    func_8005B5F0(levelnum);
+    loadboard(levelnum);
 
     prelevel(g);
 

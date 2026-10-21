@@ -77,9 +77,9 @@ void getviewborder(short snum, short *x1, short *y1, short *x2, short *y2)
 unsigned short invtilescale(unsigned short sc, unsigned short tile)
 {
     tile = gettileid(tile);
-    if (tileinfo[tile].dim2 == 0)
+    if (tileinfo[tile].dimy == 0)
         return 0;
-    return (sc * 100) / tileinfo[tile].dim2;
+    return (sc * 100) / tileinfo[tile].dimy;
 }
 
 

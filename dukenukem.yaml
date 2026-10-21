@@ -30,7 +30,7 @@ segments:
     vram: 0x80000400
     bss_size: 0x4B000
     subsegments:
-      - { type: bss, vram: 0x80000400, name: src/framebuffer }
+      - { type: .bss, vram: 0x80000400, name: src/framebuffer }
 
   - name: main
     type: code
@@ -51,6 +51,7 @@ segments:
       - [0x0DEF0, c, src/sound2]
       - [0x0F020, c, src/rend1]
       - [0x111F0, c, src/rend2]
+      - [0x1D190, c, src/rend3]
       - [0x24020, c, src/getangle]
       - [0x242B0, c, src/draw]
       - [0x25CF0, c, src/rnc]
@@ -306,6 +307,7 @@ segments:
       - [0xBA200, .rodata, src/sound1]
       - [0xBA340, .rodata, src/rend1]
       - [0xBA4D0, .rodata, src/rend2]
+      - [0xBA980, .rodata, src/rend3]
       - [0xBAD30, .rodata, src/getangle]
       - [0xBAD50, .rodata, src/draw]
       - [0xBAD90, .rodata, src/cache1d]
@@ -359,6 +361,7 @@ segments:
       - { type: bss, vram: 0x801CD840, name: src/sound1 }
       - { type: .bss, vram: 0x8021A400, name: src/rend1 }
       - { type: bss, vram: 0x8021D660, name: src/rend2 }
+      - { type: bss, vram: 0x8026EBA0, name: src/rend3 }
       - { type: .bss, vram: 0x8026ECB0, name: src/draw }
       - { type: .bss, vram: 0x8026ECC0, name: src/rnc }
       - { type: .bss, vram: 0x8026EFE0, name: src/cache1d }
@@ -403,7 +406,7 @@ segments:
     vram: 0x803DA800
     bss_size: 0x25800
     subsegments:
-      - { type: bss, vram: 0x803DA800, name: src/zbuffer }
+      - { type: .bss, vram: 0x803DA800, name: src/zbuffer }
 
   - name: static
     type: code
