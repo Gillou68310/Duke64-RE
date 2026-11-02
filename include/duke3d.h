@@ -222,7 +222,6 @@ typedef struct
 {
     short i;
     int voice;
-    int f_8;
 } SOUNDOWNER;
 
 typedef struct
@@ -387,7 +386,7 @@ extern char *fta_quotes[NUMOFFIRSTTIMEACTIVE];
 
 extern SAMPLE Sound[ NUM_SOUNDS ];
 extern int32 VoiceToggle,AmbienceToggle;
-extern SOUNDOWNER SoundOwner[NUM_SOUNDS][4];
+extern SOUNDOWNER SoundOwner[NUM_SOUNDS][6];
 
 extern char playerreadyflag[MAXPLAYERS],playerquitflag[MAXPLAYERS];
 extern char sounds[NUM_SOUNDS][14];
@@ -574,11 +573,22 @@ typedef struct
 
 extern unkstruct1_t D_801CB8F8[4];
 extern s8 D_800D3748;
+extern s8 D_800D374C;
 extern OSMesgQueue D_801C92F0;
 extern OSContPad D_801C9328[4];
 extern OSPfs D_801C9350;
 extern OSMesg D_801CB8D8;
-
+extern u8 D_800D3744[4];
+extern s32 D_801C9340;
+extern s32 D_801C9344;
+extern s32 D_801C9348;
+extern s8 D_800D38B8;
+extern s32 D_800D38BC;
+extern s8 D_800D38C0;
+extern s32 D_800D38C4;
+extern s8 D_801012A8;
+extern u16 D_8027A3BE;
 extern OSPfs D_801CB728[];
+extern s16 D_801012A0;
 
 #include "funct.h"

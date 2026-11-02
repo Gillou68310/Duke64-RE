@@ -310,3 +310,7 @@ void animateboss2(void);
 void func_80056150(void);
 void drawrooms_(s32 posx, s32 posy, s32 posz, s32 arg3, s16 sectnum);
 void func_80051A80(s32);
+void func_80051D40(void);
+void func_80051D6C(void);
+void func_800524F0(void);
+void func_800B76A0(void);

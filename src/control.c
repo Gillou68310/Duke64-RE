@@ -5,7 +5,7 @@ void func_8004D664(s16 playernum);
 void func_8004D888(s16 playernum);
 
 s8 D_800D3740[4] = {0};
-s8 D_800D3744[4] = {0};
+u8 D_800D3744[4] = {0};
 s8 D_800D3748 = -1;
 s8 D_800D374C = -1;
 

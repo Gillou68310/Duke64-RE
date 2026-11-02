@@ -251,10 +251,10 @@ segments:
       - [0x89350, data, src/game1]
       - [0x894B0, .data, src/control2]
       - [0x894D0, data, src/game2]
-      - [0x89530, data, src/logo]
+      - [0x89530, .data, src/logo]
       - [0x895B0, data, src/boss2]
       - [0x8A490, data, src/sound1]
-      - [0x8A980, data, src/sound2]
+      - [0x8A980, .data, src/sound2]
       - [0x8A990, .data, src/rend1]
       - [0x8F660, data, src/rend2]
       - [0x903A0, .data, src/getangle]
@@ -359,6 +359,7 @@ segments:
       - { type: bss, vram: 0x801CB920, name: src/game2 }
       - { type: bss, vram: 0x801CBE00, name: src/boss2 }
       - { type: bss, vram: 0x801CD840, name: src/sound1 }
+      - { type: .bss, vram: 0x8021A060, name: src/sound2 }
       - { type: .bss, vram: 0x8021A400, name: src/rend1 }
       - { type: bss, vram: 0x8021D660, name: src/rend2 }
       - { type: bss, vram: 0x8026EBA0, name: src/rend3 }

@@ -175,12 +175,12 @@ void func_8005B728(void)
     globalxpos = boardinfo[globalboardnum].xpos;
     globalypos = boardinfo[globalboardnum].ypos;
     globalzpos = boardinfo[globalboardnum].zpos;
-    ps->posx = (globalxpos * 2);
-    ps->posy = (globalypos * 2);
-    ps->posz = (globalzpos * 32);
-    ps->ang = boardinfo[globalboardnum].ang;
-    ps->cursectnum = 4;
-    ps->over_shoulder_on = 0;
+    ps[0].posx = (globalxpos * 2);
+    ps[0].posy = (globalypos * 2);
+    ps[0].posz = (globalzpos * 32);
+    ps[0].ang = boardinfo[globalboardnum].ang;
+    ps[0].cursectnum = 4;
+    ps[0].over_shoulder_on = 0;
     sector_addr = boardinfo[globalboardnum].sector_addr;
     RNCDecompress(sector_addr, (char *)sector);
     RNCDecompress(boardinfo[globalboardnum].wall_addr, (char *)wall);
@@ -417,11 +417,93 @@ void func_80063270(void)
 void func_800632BC(s32, s32);
 #pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_800632BC.s")
 
-void func_80063470(s32, s32);
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80063470.s")
+void func_80063470(s32 arg0, s32 arg1)
+{
+    s16 picnum;
+    s32 i, j, k;
 
-void func_80063594(s32, s32);
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80063594.s")
+    if (!sector[drawfloorlist[arg0]].floorpicnum) // FAKE
+    {
+    }
+loop_1:
+    if (arg0 < arg1)
+    {
+        i = arg0 - 1;
+        j = arg1;
+        picnum = sector[drawfloorlist[arg1]].floorpicnum;
+        do
+        {
+            do
+            {
+                i += 1;
+            } while (sector[drawfloorlist[i]].floorpicnum < picnum);
+
+            do
+            {
+                j -= 1;
+            } while (picnum < sector[drawfloorlist[j]].floorpicnum);
+
+            k = drawfloorlist[i];
+            if (arg1) // FAKE
+            {
+            }
+            drawfloorlist[i] = drawfloorlist[j];
+            drawfloorlist[j] = k;
+        } while (i < j);
+
+        k = drawfloorlist[j];
+        drawfloorlist[j] = drawfloorlist[i];
+        drawfloorlist[i] = drawfloorlist[arg1];
+        drawfloorlist[arg1] = k;
+        func_80063470(arg0, i - 1);
+        arg0 = i + 1;
+        goto loop_1;
+    }
+}
+
+void func_80063594(s32 arg0, s32 arg1)
+{
+    s16 picnum;
+    s32 i, j, k;
+
+    if (!sector[drawceilinglist[arg0]].ceilingpicnum) // FAKE
+    {
+    }
+loop_1:
+    if (arg0 < arg1)
+    {
+        i = arg0 - 1;
+        j = arg1;
+        picnum = sector[drawceilinglist[arg1]].ceilingpicnum;
+        do
+        {
+            do
+            {
+                i += 1;
+            } while (sector[drawceilinglist[i]].ceilingpicnum < picnum);
+
+            do
+            {
+                j -= 1;
+            } while (picnum < sector[drawceilinglist[j]].ceilingpicnum);
+
+            k = drawceilinglist[i];
+            if (arg1) // FAKE
+            {
+            }
+            drawceilinglist[i] = drawceilinglist[j];
+            drawceilinglist[j] = k;
+        } while (i < j);
+
+        k = drawceilinglist[j];
+        drawceilinglist[j] = drawceilinglist[i];
+        drawceilinglist[i] = drawceilinglist[arg1];
+        drawceilinglist[arg1] = k;
+        func_80063594(arg0, i - 1);
+        arg0 = i + 1;
+        goto loop_1;
+    }
+}
 
 void func_800636B8(void)
 {
