@@ -328,7 +328,7 @@ short aim(spritetype *s,short aang)
 
 int BUTTON(int a)
 {
-    switch (a & 0xFFFF0000) {                              /* irregular */
+    switch (a & 0xFFFF0000) {
     case 0x0:
         if (buttonheld & a & 0xFFFF) {
             return -1;
@@ -377,7 +377,7 @@ void getinput(short snum)
     stickx = control_stickx[snum];
     sticky = control_sticky[snum];
     buttonheld = control_button[snum];
-    button_mode = cm->buttonmode;
+    button_mode = cm->key.buttonmode;
     if (game_inactive)
     {
         demoinput();
@@ -394,23 +394,23 @@ void getinput(short snum)
     if ((ud.multimode > 1 && ud.coop == 0 && ps[snum].last_extra <= 0 && dukematch_mode == 4))
         return;
     
-    loc.bits =   (BUTTON(cm->jump) < 0);
-    loc.bits |=   (BUTTON(cm->crouch) < 0)<<1;
-    loc.bits |=   (BUTTON(cm->fire) < 0)<<2;
-    loc.bits |=   (BUTTON(cm->aim_up) < 0)<<3;
-    loc.bits |=   (BUTTON(cm->aim_down) < 0)<<4;
+    loc.bits =   (BUTTON(cm->key.jump) < 0);
+    loc.bits |=   (BUTTON(cm->key.crouch) < 0)<<1;
+    loc.bits |=   (BUTTON(cm->key.fire) < 0)<<2;
+    loc.bits |=   (BUTTON(cm->key.aim_up) < 0)<<3;
+    loc.bits |=   (BUTTON(cm->key.aim_down) < 0)<<4;
     
     j=0;
-    if (BUTTON(cm->next_weapon) < 0)
+    if (BUTTON(cm->key.next_weapon) < 0)
         j = 12;
-    if (BUTTON(cm->prev_weapon) < 0)
+    if (BUTTON(cm->key.prev_weapon) < 0)
         j = 11;
     
     loc.bits |=   j<<8;
-    loc.bits |=   (BUTTON(cm->open) < 0)<<29;
-    loc.bits |=   (BUTTON(cm->inv_left) < 0)<<20;
-    loc.bits |=   (BUTTON(cm->inv_right) < 0)<<27;
-    loc.bits |=   (BUTTON(cm->inventory) < 0)<<30;
+    loc.bits |=   (BUTTON(cm->key.open) < 0)<<29;
+    loc.bits |=   (BUTTON(cm->key.inv_left) < 0)<<20;
+    loc.bits |=   (BUTTON(cm->key.inv_right) < 0)<<27;
+    loc.bits |=   (BUTTON(cm->key.inventory) < 0)<<30;
                     
     svel = vel = angvel = 0;
     horiz = sync[snum].horz;
@@ -439,13 +439,13 @@ void getinput(short snum)
     turnamount = NORMALTURN<<1;
     keymove = NORMALKEYMOVE<<1;
     
-    if (BUTTON(cm->strafe_left) < 0)
+    if (BUTTON(cm->key.strafe_left) < 0)
         svel += keymove;
-    if (BUTTON(cm->strafe_right) < 0)
+    if (BUTTON(cm->key.strafe_right) < 0)
         svel -= keymove;
-    if (BUTTON(cm->forward) < 0)
+    if (BUTTON(cm->key.forward) < 0)
         vel += keymove;
-    if (BUTTON(cm->backward) < 0)
+    if (BUTTON(cm->key.backward) < 0)
         vel -= keymove;
 
     if(vel < -MAXVEL) vel = -MAXVEL;

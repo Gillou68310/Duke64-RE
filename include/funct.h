@@ -309,3 +309,4 @@ void displayrest(long smoothratio);
 void animateboss2(void);
 void func_80056150(void);
 void drawrooms_(s32 posx, s32 posy, s32 posz, s32 arg3, s16 sectnum);
+void func_80051A80(s32);

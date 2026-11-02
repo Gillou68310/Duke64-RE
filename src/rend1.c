@@ -3948,7 +3948,7 @@ void demoinput(void)
         demo_button = D_800D7948[boardtimer].button;
         break;
     }
-    if ((demo_button == 0xFFFF) || (ps->last_extra <= 0))
+    if ((demo_button == 0xFFFF) || (ps[0].last_extra <= 0))
     {
         gamestate = 13;
         demo_stickx = 0;

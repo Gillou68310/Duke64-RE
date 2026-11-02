@@ -247,10 +247,10 @@ segments:
       - [0x88490, textbin, ucode/aspMain.text]
       - [0x892B0, .data, src/main]
       - [0x89300, .data, src/sched]
-      - [0x89340, data, src/control]
+      - [0x89340, .data, src/control]
       - [0x89350, data, src/game1]
-      - [0x894B0, data, src/control2]
-      - [0x89520, data, src/game2]
+      - [0x894B0, .data, src/control2]
+      - [0x894D0, data, src/game2]
       - [0x89530, data, src/logo]
       - [0x895B0, data, src/boss2]
       - [0x8A490, data, src/sound1]
@@ -353,9 +353,9 @@ segments:
       - [0xBFDC0, rodatabin, ucode/gspFast3D.data]
       - [0xC05C0, rodatabin, ucode/aspMain.data]
       - { type: .bss, vram: 0x8010AC80, name: src/main }
-      - { type: bss, vram: 0x801C92F0, name: src/control }
+      - { type: .bss, vram: 0x801C92F0, name: src/control }
       - { type: bss, vram: 0x801C94D0, name: src/game1 }
-      - { type: bss, vram: 0x801CB8E0, name: src/control2 }
+      - { type: .bss, vram: 0x801CB8E0, name: src/control2 }
       - { type: bss, vram: 0x801CB920, name: src/game2 }
       - { type: bss, vram: 0x801CBE00, name: src/boss2 }
       - { type: bss, vram: 0x801CD840, name: src/sound1 }

@@ -474,10 +474,15 @@ extern float viewhorizang;
 
 extern unsigned short buttonheld, button_mode;
 
-typedef struct {
-    int jump, crouch, fire, aim_up, aim_down, prev_weapon, next_weapon;
-    int inv_left, inv_right, open, inventory, forward, backward;
-    int strafe_left, strafe_right, buttonmode;
+typedef union
+{
+    struct
+    {
+        int jump, crouch, fire, aim_up, aim_down, prev_weapon, next_weapon;
+        int inv_left, inv_right, open, inventory, forward, backward;
+        int strafe_left, strafe_right, buttonmode;
+    } key;
+    u32 map[16];
 } controlmap_t;
 
 extern volatile unsigned short control_button[4];
@@ -527,6 +532,8 @@ extern s32 wallpolycount;
 extern s32 drawceilcnt;
 extern s32 drawfloorcnt;
 extern s32 drawwallcnt;
+extern u16 drawceilinglist[128];
+extern u16 drawfloorlist[128];
 extern u16 drawwalllist[256];
 extern vertex_t wallvertex[12];
 extern float projmatrix[4][4];
@@ -555,5 +562,23 @@ extern gfxpool_t *viewinfo;
 extern Gfx dl_0[];
 extern Gfx dl_1[];
 extern Gfx dl_2[];
+
+typedef struct
+{
+    s8 unk0;
+    s8 unk1;
+    u16 unk2;
+    u8 unk4;
+    s16 unk6;
+} unkstruct1_t;
+
+extern unkstruct1_t D_801CB8F8[4];
+extern s8 D_800D3748;
+extern OSMesgQueue D_801C92F0;
+extern OSContPad D_801C9328[4];
+extern OSPfs D_801C9350;
+extern OSMesg D_801CB8D8;
+
+extern OSPfs D_801CB728[];
 
 #include "funct.h"
