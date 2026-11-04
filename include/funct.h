@@ -314,3 +314,4 @@ void func_80051D40(void);
 void func_80051D6C(void);
 void func_800524F0(void);
 void func_800B76A0(void);
+u8 func_8005878C(s16 arg0, s16 arg1, s32 *arg2);

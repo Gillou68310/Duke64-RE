@@ -1,24 +1,12 @@
 #include "common.h"
 #include "duke3d.h"
 
-typedef struct
-{
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s32 unk4;
-    s32 unk8;
-    s16 unkC;
-    s32 unk10;
-    s32 unk14;
-} sound2struct_t;
-
 s32 D_800D4D80 = 0;
 u8 D_800D4D84[4] = {0};
 
 OSMesgQueue D_8021A060;
 OSMesg D_8021A078[32];
-sound2struct_t D_8021A0F8[32];
+unk8021A0F8 D_8021A0F8[32];
 u8 D_8021A3F8;
 
 void soundSetupMsgQueue(void)
@@ -180,20 +168,13 @@ u8 func_8005878C(s16 arg0, s16 arg1, s32 *arg2)
         }
     }
 
-    if (1)
-    {
-    }
-    if (1)
-    {
-    } // FAKE
+    if (1) // FAKE
+        ;
     if ((sprite[arg0].picnum == APLAYER) && (D_8021A3F8 == sprite[arg0].yvel))
-    {
         *arg2 = 0x40;
-    }
     else
-    {
         *arg2 = func_80058684(arg0);
-    }
+
     i = d1;
     if ((&sprite[arg0] >= &sprite[0]) && !(soundm[arg1] & 0x10) &&
         (sprite[arg0].picnum == 5) && (sprite[arg0].lotag < 999) &&
@@ -204,17 +185,13 @@ u8 func_8005878C(s16 arg0, s16 arg1, s32 *arg2)
 
     i += soundvo[arg1];
     if (i < 0)
-    {
         i = 0;
-    }
+
     if (soundm[arg1] & 0x10)
-    {
         i = 0;
-    }
+
     if ((soundm[arg1] & 4) && (sprite[arg0].yvel < numplayers))
-    {
         i = 0;
-    }
 
     switch (arg1)
     {
@@ -226,19 +203,17 @@ u8 func_8005878C(s16 arg0, s16 arg1, s32 *arg2)
             i = 0x1800;
         break;
     }
+
     if (i > 0x4000)
-    {
         i = 0x4000;
-    }
+
     i = (0x4000 - i) >> 6;
     if (i > 0xFF)
-    {
         i = 0xFF;
-    }
+
     if (i < 0)
-    {
         i = 0;
-    }
+
     return i;
 }
 
@@ -260,17 +235,14 @@ int xyzsound(short num, short i, long x, long y, long z)
     long j, k;
 
     if (num > NUM_SOUNDS)
-    {
         return -1;
-    }
+
     if (Sound[num].num >= 6)
-    {
         return -1;
-    }
+
     if ((soundm[num] & 1) && (Sound[num].num > 0))
-    {
         return -1;
-    }
+
     if (soundm[num] & 0x80)
     {
         sound(num);
@@ -287,9 +259,7 @@ int xyzsound(short num, short i, long x, long y, long z)
 
     sp57 = func_8005878C(i, num, &sp50);
     if (sp57 == 0)
-    {
         return -1;
-    }
 
     pitchs = soundps[num];
     pitche = soundpe[num];
@@ -371,9 +341,8 @@ void func_80058FEC(s16 arg0, u8 arg1)
 int spritesound(unsigned short num, short i)
 {
     if (num >= NUM_SOUNDS)
-    {
         return -1;
-    }
+
     return xyzsound(num, i, sprite[i].x, sprite[i].y, sprite[i].z);
 }
 

@@ -27,6 +27,7 @@ Prepared for public release: 03/21/2003 - Charlie Wiederhold, 3D Realms
 //-------------------------------------------------------------------------
 
 #include "ultra64.h"
+#include "sched.h"
 #include "pragmas.h"
 #include "build.h"
 #include "names.h"
@@ -51,6 +52,7 @@ typedef u16 framebuffer_t[2][SCREEN_WIDTH*SCREEN_HEIGHT];
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
+#define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
 
 typedef int int32;
 
@@ -569,9 +571,9 @@ typedef struct
     u16 unk2;
     u8 unk4;
     s16 unk6;
-} unkstruct1_t;
+} unk801CB8F8;
 
-extern unkstruct1_t D_801CB8F8[4];
+extern unk801CB8F8 D_801CB8F8[4];
 extern s8 D_800D3748;
 extern s8 D_800D374C;
 extern OSMesgQueue D_801C92F0;
@@ -590,5 +592,23 @@ extern s8 D_801012A8;
 extern u16 D_8027A3BE;
 extern OSPfs D_801CB728[];
 extern s16 D_801012A0;
+extern s16 D_801012A4;
+
+typedef struct
+{
+    u8 unk0;
+    u8 unk1;
+    s16 unk2;
+    s32 unk4;
+    s32 unk8;
+    s16 unkC;
+    s32 unk10;
+    s32 unk14;
+} unk8021A0F8;
+
+extern OSMesgQueue audioReplyMsgQ;
+extern OSMesgQueue D_8021A060;
+extern OSSched scheduler;
+extern char pow2char[8];
 
 #include "funct.h"

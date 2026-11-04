@@ -11,7 +11,7 @@ s8 D_800D38C0 = 0;
 s32 D_800D38C4 = 0;
 
 OSMesgQueue D_801CB8E0;
-unkstruct1_t D_801CB8F8[4];
+unk801CB8F8 D_801CB8F8[4];
 
 void func_80051850(void)
 {

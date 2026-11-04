@@ -1,5 +1,4 @@
 #include "common.h"
-#include "sched.h"
 #include "duke3d.h"
 
 float sky_re = 0.f;
@@ -37,7 +36,7 @@ OSMesgQueue controllerthreadsync;
 OSMesgQueue retraceMessageQ;
 OSMesgQueue contr_msqueue;
 OSMesgQueue D_80123680;
-OSMesgQueue D_80123698;
+OSMesgQueue audioReplyMsgQ;
 OSMesg D_801236B0[8];
 OSMesg D_801236D0[1];
 OSMesg D_801236D8[8];
@@ -406,7 +405,7 @@ void controllerThread(void* a1)
 void __amMain(void* a1)
 {
 	OSScMsg* msg;
-	osCreateMesgQueue(&D_80123698, D_80123738, 1);
+	osCreateMesgQueue(&audioReplyMsgQ, D_80123738, 1);
 	osCreateMesgQueue(&D_80123680, D_80123718, 8);
 	osScAddClient(&scheduler, &D_801235E0, &D_80123680);
 	while (1)

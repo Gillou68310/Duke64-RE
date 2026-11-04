@@ -423,8 +423,8 @@ void func_80063470(s32 arg0, s32 arg1)
     s32 i, j, k;
 
     if (!sector[drawfloorlist[arg0]].floorpicnum) // FAKE
-    {
-    }
+        ;
+
 loop_1:
     if (arg0 < arg1)
     {
@@ -445,8 +445,7 @@ loop_1:
 
             k = drawfloorlist[i];
             if (arg1) // FAKE
-            {
-            }
+                ;
             drawfloorlist[i] = drawfloorlist[j];
             drawfloorlist[j] = k;
         } while (i < j);
@@ -467,8 +466,8 @@ void func_80063594(s32 arg0, s32 arg1)
     s32 i, j, k;
 
     if (!sector[drawceilinglist[arg0]].ceilingpicnum) // FAKE
-    {
-    }
+        ;
+
 loop_1:
     if (arg0 < arg1)
     {
@@ -489,8 +488,7 @@ loop_1:
 
             k = drawceilinglist[i];
             if (arg1) // FAKE
-            {
-            }
+                ;
             drawceilinglist[i] = drawceilinglist[j];
             drawceilinglist[j] = k;
         } while (i < j);
