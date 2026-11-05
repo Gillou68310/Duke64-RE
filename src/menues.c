@@ -1,14 +1,39 @@
 #include "common.h"
+#include "duke3d.h"
+
+extern s8 D_801012B8;
+extern s32 D_8010135C;
+extern s8 D_801CB922;
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/menues/func_800B76A0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/menues/func_800B788C.s")
+s32 func_800B788C(u16 *arg0, u16 *arg1)
+{
+    s32 i;
+    s32 ret = 1;
+
+    for (i = 0; i < 8; i++)
+    {
+        if (arg0[i] != arg1[i])
+        {
+            ret = 0;
+            break;
+        }
+    }
+    return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/menues/D_80109300.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/menues/menus.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/menues/func_800BAAAC.s")
+void func_800BAAAC(void)
+{
+    next_menu = 0x11;
+    D_801012B8 = 6;
+    D_8010135C = 0x384;
+    D_801CB922 = 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/menues/D_8010932C.s")
 

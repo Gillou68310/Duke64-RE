@@ -59,7 +59,7 @@ typedef struct
 #define MAXEXPLOSIONS 16
 
 extern u16 D_8026EC00;
-extern s16 tilemap[MAXTILES];
+extern u16 tilemap[MAXTILES];
 extern s32 D_800D9AEC;
 extern u8 D_8025F398[];
 extern char D_8025FEC0[];
@@ -524,8 +524,16 @@ u16 gettileid(u16 tilenum)
         return tileid;
 }
 
-void func_80063750(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/src/rend2/func_80063750.s")
+void func_80063750(void)
+{
+    u16 i;
+
+    for (i = 0; i < MAXTILES; i++)
+        tilemap[i] = MAXTILES;
+
+    for (i = 0; i < 2851; i++)
+        tilemap[tileinfo[i].tile] = i;
+}
 
 void func_800637C8(void)
 {

@@ -611,4 +611,6 @@ extern OSMesgQueue D_8021A060;
 extern OSSched scheduler;
 extern char pow2char[8];
 
+extern char D_8025FEC0[];
+
 #include "funct.h"

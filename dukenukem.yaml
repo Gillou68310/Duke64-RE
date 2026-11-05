@@ -417,86 +417,47 @@ segments:
       - [0xC0880, bin, palette]
       - [0xC20E0, .data, src/dlstatic]
 
-  - name: tiles
-    type: code
-    start: 0xC2270
-    vram: 0
-    subsegments:
-      - [0xC2270, bin, tileblob]
-  
-  - name: boards
-    type: code
-    start: 0x3F4950
-    vram: 0
-    subsegments:
-      - [0x3F4950, bin, board01]
-      - [0x4075E0, bin, board02]
-      - [0x41AF60, bin, board03]
-      - [0x430FC0, bin, board04]
-      - [0x449C20, bin, board06]
-      - [0x462370, bin, board05]
-      - [0x470C40, bin, board07]
-      - [0x4744F0, bin, board09]
-      - [0x483A80, bin, board10]
-      - [0x491D20, bin, board11]
-      - [0x4AB9D0, bin, board12]
-      - [0x4C0A20, bin, board13]
-      - [0x4CA480, bin, board14]
-      - [0x4DA5F0, bin, board15]
-      - [0x4EE4F0, bin, board16]
-      - [0x507B10, bin, board17]
-      - [0x50FD10, bin, board18]
-      - [0x512D60, bin, board19]
-      - [0x519B10, bin, board20]
-      - [0x52BDD0, bin, board21]
-      - [0x53BF10, bin, board22]
-      - [0x54DC90, bin, board23]
-      - [0x55A230, bin, board24]
-      - [0x5676A0, bin, board25]
-      - [0x57D4D0, bin, board26]
-      - [0x58ADA0, bin, board27]
-      - [0x59CEB0, bin, board28]
-      - [0x5A15D0, bin, board30]
-      - [0x5B6870, bin, board08]
-      - [0x5C9A70, bin, board29]
-      - [0x5E46C0, bin, board31]
-      - [0x5EEE10, bin, board32]
-      - [0x5F5450, bin, board33]
-      - [0x5FA600, bin, board34]
+  - [0xC2270, bin, tileblob]
+  - [0x3E9550, bin, boss2]
+  - [0x3F4950, bin, board01]
+  - [0x4075E0, bin, board02]
+  - [0x41AF60, bin, board03]
+  - [0x430FC0, bin, board04]
+  - [0x449C20, bin, board06]
+  - [0x462370, bin, board05]
+  - [0x470C40, bin, board07]
+  - [0x4744F0, bin, board09]
+  - [0x483A80, bin, board10]
+  - [0x491D20, bin, board11]
+  - [0x4AB9D0, bin, board12]
+  - [0x4C0A20, bin, board13]
+  - [0x4CA480, bin, board14]
+  - [0x4DA5F0, bin, board15]
+  - [0x4EE4F0, bin, board16]
+  - [0x507B10, bin, board17]
+  - [0x50FD10, bin, board18]
+  - [0x512D60, bin, board19]
+  - [0x519B10, bin, board20]
+  - [0x52BDD0, bin, board21]
+  - [0x53BF10, bin, board22]
+  - [0x54DC90, bin, board23]
+  - [0x55A230, bin, board24]
+  - [0x5676A0, bin, board25]
+  - [0x57D4D0, bin, board26]
+  - [0x58ADA0, bin, board27]
+  - [0x59CEB0, bin, board28]
+  - [0x5A15D0, bin, board30]
+  - [0x5B6870, bin, board08]
+  - [0x5C9A70, bin, board29]
+  - [0x5E46C0, bin, board31]
+  - [0x5EEE10, bin, board32]
+  - [0x5F5450, bin, board33]
+  - [0x5FA600, bin, board34]
 
-  - name: soundctl
-    type: code
-    start: 0x5FE770
-    vram: 0
-    subsegments:
-      - [0x5FE770, bin, soundctl]
-
-  - name: soundtbl
-    type: code
-    start: 0x60B330
-    vram: 0
-    subsegments:
-      - [0x60B330, bin, soundtbl]
-
-  - name: musicseq
-    type: code
-    start: 0x7BBFC0
-    vram: 0
-    subsegments:
-      - [0x7BBFC0, bin, musicseq]
-    
-  - name: musicctl
-    type: code
-    start: 0x7BC6E0
-    vram: 0
-    subsegments:
-      - [0x7BC6E0, bin, musicctl]
-
-  - name: musictbl
-    type: code
-    start: 0x7BD580
-    vram: 0
-    subsegments:
-      - [0x7BD580, bin, musictbl]
+  - [0x5FE770, bin, soundctl]
+  - [0x60B330, bin, soundtbl]
+  - [0x7BBFC0, bin, musicseq]
+  - [0x7BC6E0, bin, musicctl]
+  - [0x7BD580, bin, musictbl]
 
   - [0x800000]

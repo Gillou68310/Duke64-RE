@@ -1,10 +1,23 @@
 #include "common.h"
+#include "duke3d.h"
+
+extern s16 D_800D3774;
+extern s16 D_800D3778;
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/game1/gameplay.s")
 
+s16 func_8004DCB8(void);
 #pragma GLOBAL_ASM("asm/nonmatchings/src/game1/func_8004DCB8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/game1/func_8004DED8.s")
+void func_8004DED8(void)
+{
+    sound(0xC);
+    menu_levelnum = func_8004DCB8();
+    levelnum = menu_levelnum;
+    ud.secretlevel = 0;
+    menu_inputfreeze = 0x32;
+    func_80055450();
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/game1/display_bonus.s")
 
@@ -80,7 +93,14 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/game1/func_8004ECF0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/game1/func_8004F96C.s")
+void func_8004F96C(s16 arg0)
+{
+    if (arg0 != 0)
+    {
+        D_800D3778 += 1;
+        D_800D3774 = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/game1/func_8004F9A0.s")
 
@@ -90,7 +110,30 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/game1/func_80050A10.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/src/game1/func_80050E18.s")
+void func_80050E18(u8 arg0, s32 y, char *string)
+{
+    s16 a;
+
+    if ((y >= 0) && (y <= SCREEN_HEIGHT))
+    {
+        if (y > 0xC0)
+        {
+            a = (-y * 16) + 0xD00;
+        }
+        else
+        {
+            if ((y * 16) - 0x100 > 0x100)
+                a = 0x100;
+            else
+                a = (y * 16) - 0x100;
+        }
+        setrotatespriteflags(0xFF, 0xFF, 0xFF, a);
+        if (arg0 == 1)
+            gametext(-1, y, string);
+        else
+            menutext(-1, y, string);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/src/game1/D_80102B34.s")
 
